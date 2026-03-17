@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include <glfw3.h>
-#include <glm/glm.hpp>
+#include <glm.hpp>
 #include <iostream>
 
 // Definimos el ancho, alto y nombre de nuestra ventana
