@@ -4,8 +4,8 @@
 #include <iostream>
 
 // Definimos el ancho, alto y nombre de nuestra ventana
-constexpr unsigned int ANCHO{ 1280 };
-constexpr unsigned int ALTO{ 720 };
+constexpr unsigned int ANCHO{1280};
+constexpr unsigned int ALTO{720};
 constexpr const char* NOMBRE = "Ventana";
 
 // Definimos nuestros colores de ventana fuera del main
@@ -26,7 +26,7 @@ int main() {
 	GLFWwindow* window = glfwCreateWindow(ANCHO, ALTO, NOMBRE, NULL, NULL);
 
 	// Si no se crea la ventana, abortamos y lo decimos por terminal
-	if (window == NULL) {
+	if(window == NULL){
 		std::cout << "Ha fallado la creacion de la ventana" << std::endl;
 		glfwTerminate();
 		return 0;
@@ -36,7 +36,7 @@ int main() {
 	glfwMakeContextCurrent(window);
 
 	// Inicializamos GLAD con el contexto de GLFW
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
 		std::cout << "Ha fallado la inicializacion de GLAD" << std::endl;
 		return 0;
 	}
@@ -48,17 +48,17 @@ int main() {
 	glm::vec4 colorActual(color1);
 
 	// Inicializamos el bucle de renderizado
-	while (!glfwWindowShouldClose(window)) {
+	while(!glfwWindowShouldClose(window)){
 		// Si aprieta la tecla numérica 1
-		if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+		if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
 			colorActual = color1;
 		}
 		// Si aprieta la tecla numérica 2
-		if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+		if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
 			colorActual = color2;
 		}
 		// Si aprieta la tecla numérica 3
-		if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+		if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
 			colorActual = color3;
 		}
 

@@ -8,12 +8,17 @@ constexpr unsigned int ANCHO{1280};
 constexpr unsigned int ALTO{720};
 constexpr const char* NOMBRE = "Ventana";
 
-// Definimos nuestros colores de ventana fuera del main
-glm::vec4 color1(0.78, 0.78, 0.78, 0.78);
-glm::vec4 color2(0.6, 0.6, 0.6, 1);
-glm::vec4 color3(0.22, 0.22, 0.22, 1);
+// Definimos nuestros colores de ventana
+glm::vec4 color1(200, 200, 200, 200);
+glm::vec4 color2(155, 155, 155, 255);
+glm::vec4 color3(55, 55, 55, 255);
 
-int main() {
+// Redefinicion del metodo de OpenGL, permite hacer resize de la ventana manualmente
+void framebuffer_size_callback([[maybe_unused]] GLFWwindow* window, int width, int height){
+	glViewport(0, 0, width, height);
+}
+
+int main(){
     // Inicio GLFW
     glfwInit();
 
@@ -24,7 +29,6 @@ int main() {
 
     // Creamos la ventana con GLFW
 	GLFWwindow* window = glfwCreateWindow(ANCHO, ALTO, NOMBRE, NULL, NULL);
-
     // Si no se crea la ventana, abortamos y lo decimos por terminal
 	if(window == NULL){
 		std::cout << "Ha fallado la creacion de la ventana" << std::endl;
@@ -44,28 +48,31 @@ int main() {
     // Iniciamos el viewport de OpenGL
     glViewport(0, 0, ANCHO, ALTO);
 
+    // Le decimos a GLFW que use la funcion nuestra para cada vez que se intente cambiar el size de la ventana
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
 	// El color actual de la ventana
 	glm::vec4 colorActual(color1);
 
 	// Inicializamos el bucle de renderizado
     while(!glfwWindowShouldClose(window)){
-		// Si aprieta la tecla numérica 1
-		if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
+		// Si aprieta la tecla 1
+		if(glfwGetKey(window, 49) == GLFW_PRESS){
 			colorActual = color1;
 		}
-		// Si aprieta la tecla numérica 2
-		if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
+		// Si aprieta la tecla 2
+		if(glfwGetKey(window, 50) == GLFW_PRESS){
 			colorActual = color2;
 		}
-		// Si aprieta la tecla numérica 3
-		if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
+		// Si aprieta la tecla 3
+		if(glfwGetKey(window, 51) == GLFW_PRESS){
 			colorActual = color3;
 		}
 
-		// Limpiamos la pantalla con el color actual
-		glClearColor(colorActual.x, colorActual.y, colorActual.z, colorActual.w);
-		// Limpiamos tambien el buffer de color
-		glClear(GL_COLOR_BUFFER_BIT);
+		// Limpiamos la pantalla con el color de limpieza
+    	glClearColor(colorActual.x/255.0f, colorActual.y/255.0f, colorActual.z/255.0f, colorActual.w/255.0f);
+    	// Limpiamos tambien el buffer de color y el buffer de profundidad
+    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Procesamos todos los eventos pendientes antes de la siguiente iteracion
 		glfwPollEvents();
