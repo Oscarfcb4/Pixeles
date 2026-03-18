@@ -8,6 +8,36 @@ constexpr unsigned int ANCHO{1280};
 constexpr unsigned int ALTO{720};
 constexpr const char* NOMBRE = "Ventana";
 
+const char *vertexShaderSource = 
+	"#version 330 core\n"
+	"layout (location = 0) in vec3 aPos;\n"
+	"void main(){\n"
+	"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+	"}\0";
+
+const char *fragmentShaderSource = 
+	"#version 330 core\n"
+	"out vec4 FragColor;\n"
+	"void main(){\n"
+	"FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+	"}\0";
+
+typedef struct Color {
+    float r, g, b, a;
+    bool operator==(const Color& c) const {
+        return (
+            r == c.r && 
+            g == c.g && 
+            b == c.b && 
+            a == c.a
+        );
+    }
+} Color;
+
+struct TEntity{
+    void draw(glm::mat4 matrix = glm::mat4(1.0f));
+};
+
 // Definimos nuestros colores de ventana
 glm::vec4 color1(200, 200, 200, 200);
 glm::vec4 color2(155, 155, 155, 255);
@@ -53,6 +83,34 @@ int main(){
 
 	// El color actual de la ventana
 	glm::vec4 colorActual(color1);
+
+	// Creamos el vertexShader basico
+	unsigned int vertexShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// Le asignamos la source del codigo, en este caso lo hemos creado arriba.
+	// El 1 es por el numero de Strings que le vamos a pasar, en este caso un 1
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
+
+	// Creamos tambien el fragmentShader
+	unsigned int fragmentShader;
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glCompileShader(fragmentShader);
+
+	// Creamos el programa de shaders linkando los dos shaders
+	unsigned int shaderProgram;
+	shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	// Ahora activamos el programa
+	glUseProgram(shaderProgram);
+	// A partir de ahora, toda llamada a rendrizar usara nuestro programa
+	// Una vez linkados, eliminamos la instancia
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
 	// Inicializamos el bucle de renderizado
     while(!glfwWindowShouldClose(window)){
