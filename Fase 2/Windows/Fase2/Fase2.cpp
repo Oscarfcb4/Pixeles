@@ -6,10 +6,6 @@
 #include <iostream>
 #include <shader.hpp>
 
-// La libreria std para el procesamiento de imagenes
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 constexpr unsigned int ANCHO{ 1280 };
 constexpr unsigned int ALTO{ 720 };
 constexpr const char* NOMBRE = "Una escena cubista";
@@ -29,47 +25,44 @@ typedef struct Color {
 
 // Guardamos las posiciones de los vertices para crear una caja
 float vertices[] = {
-	-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Cara trasera T1 - Abajo izquierda  
-	0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // Cara trasera T1 - Abajo derecha
-	0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // Cara trasera T1 - Arriba derecha
-	0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // Cara trasera T2 - Arriba derecha 
-	-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // Cara trasera T2 - Arriba izquierda
-	-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Cara trasera T2 - Abajo izquierda
+	// Cara delantera (z = 0.5)
+	-0.5f,  0.5f,  0.5f,  // Vértice 3 (Esquina superior izquierda)
+	 0.5f,  0.5f,  0.5f,  // Vértice 2 (Esquina superior derecha)
+	-0.5f, -0.5f,  0.5f,  // Vértice 0 (Esquina inferior izquierda)
+	 0.5f, -0.5f,  0.5f,  // Vértice 1 (Esquina inferior derecha)
 
-	-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // Lo mismo con todas pero
-	0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // siendo la cara delantera
-	0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-	0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+	// Cara trasera (Eje Z = -0.5)
+	-0.5f,  0.5f, -0.5f,  // Vértice 7 
+	 0.5f,  0.5f, -0.5f,  // Vértice 6 
+	-0.5f, -0.5f, -0.5f,  // Vértice 4 
+	 0.5f, -0.5f, -0.5f   // Vértice 5 
+};
 
-	-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // Cara lateral izquierda T1 - Arriba al frente
-	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // Cara lateral izquierda T1 - Arriba al fondo
-	-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // Cara lateral izquierda T1 - Abajo al fondo
-	-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // Cara lateral izquierda T2 - Abajo al fondo
-	-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // Cara lateral izquierda T2 - Abajo al frente
-	-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // Cara lateral izquierda T2 - Arriba al frente
+// El orden de las caras en el cubo
+unsigned int indices[] = {
+	// Cara delantera
+	3, 2, 0,
+	3, 0, 1,
 
-	0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // Lo mismo pero con la cara
-	0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // lateral derecha
-	0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-	0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-	0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+	// Cara trasera
+	7, 6, 4,
+	7, 4, 5,
 
-	-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // Cara base inferior T1 - Frente izquierda
-	0.5f, -0.5f, -0.5f, 1.0f, 1.0f, // Cara base inferior T1 - Frente derecha
-	0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // Cara base inferior T1 - Fondo derecha
-	0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // Cara base inferior T2 - Fondo derecha
-	-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // Cara base inferior T2 - Fondo izquierda
-	-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // Cara base inferior T2 - Frente izquierda
+	// Cara izquierda
+	7, 5, 1,
+	7, 1, 3,
 
-	-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // Lo mismo pero con la cara
-	0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // base superior
-	0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-	0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f, 0.0f, 1.0f
+	// Cara derecha
+	6, 4, 0,
+	6, 0, 2,
+
+	// Cara inferior
+	7, 7, 2,
+	7, 2, 6,
+
+	// Cara superior
+	5, 4, 0,
+	5, 0, 1
 };
 
 // Guardamos las posiciones de todas las cajas que vamos a iterar
@@ -84,6 +77,20 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(1.5f, 2.0f, -2.5f),
 	glm::vec3(1.5f, 0.2f, -1.5f),
 	glm::vec3(-1.3f, 1.0f, -1.5f)
+};
+
+// Guardamos los colores de cada cubo
+Color cubeColors[] = {
+	Color(1.0f, 0.0f, 0.0f, 1.0f), // Rojo
+	Color(0.0f, 1.0f, 0.0f, 1.0f), // Verde
+	Color(0.0f, 0.0f, 1.0f, 1.0f), // Azul
+	Color(1.0f, 1.0f, 0.0f, 1.0f), // Amarillo
+	Color(0.0f, 1.0f, 1.0f, 1.0f), // Cian
+	Color(1.0f, 0.0f, 1.0f, 1.0f), // Magenta
+	Color(1.0f, 1.0f, 1.0f, 1.0f), // Blanco
+	Color(0.0f, 0.0f, 0.0f, 1.0f), // Negro
+	Color(0.5f, 0.5f, 0.5f, 1.0f), // Gris
+	Color(1.0f, 0.5f, 0.0f, 1.0f)  // Naranja
 };
 
 int main() {
@@ -109,18 +116,6 @@ int main() {
 
 	glViewport(0, 0, ANCHO, ALTO);
 
-	// Damos un color base al fondo para que no salga negro puro
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-	// Cargamos nuestros shaders basicos
-	Shader ourShader("./Shaders/vertex_shader_basico.vs", "./Shaders/fragment_shader_basico.fs");
-
-	// El orden de las caras en el cubo
-	unsigned int indices[] = {
-		0, 1, 3,
-		2, 3, 1
-	};
-
 	// Iniciamos nuestros Buffers y el Array Buffer
 	unsigned int EBO, VBO, VAO;
 	glGenBuffers(1, &EBO);
@@ -135,70 +130,44 @@ int main() {
 
 	// Le indicamos el tamaño del buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	// 3 Floats para las posiciones de cada vértice
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// Para evitar que por defecto cargue las imágenes al revés 
-	stbi_set_flip_vertically_on_load(true);
-
-	// Creamos un array de texturas, de momento de tamaño uno
-	unsigned int texture[1];
-
-	// Generamos la textura y la enlazamos
-	glGenTextures(1, texture);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
-
-	// Cargamos con stbi la imagen guardando su ancho, alto y canales
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("Texturas/barco.png", &width, &height, &nrChannels, 0);
-
-	// Si la carga correctamente, generamos una textura 2D y un mipmap con la información recibida de stbi
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Ha fallado la carga de texturas" << std::endl;
-	}
-	// Libreramos la memoria de stbi, importante
-	stbi_image_free(data);
-
-	// Recuperamos las direcciones de los uniforms en los shaders a los que vamos a añadir las matrices
-	unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-	unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
-	unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
-	unsigned int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
-
-	// Creamos la matriz modelo
+	// Creamos la matriz modelo, no necesita alteraciones
 	glm::mat4 model = glm::mat4(1.0f);
 
 	// Creamos la matriz vista
 	glm::mat4 view = glm::mat4(1.0f);
+	// Colocamos la "Cámara" con la que vamos a ver en el mundo
+	// Usamos la función de GLM para hacer la transformación de traslación
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 	// Creamos la matriz de proyeccion
 	glm::mat4 projection{};
-	projection = glm::perspective(glm::radians(45.0f), static_cast<float>(width / height), 0.1f, 100.0f);
+	// Usamos la función de GLM para la proyección perspectiva
+	projection = glm::perspective(
+		glm::radians(45.0f),              // Ángulo
+		static_cast<float>(ANCHO / ALTO), // Relación de aspecto
+		0.1f,                             // Plano Near
+		100.0f                            // Plano Far
+	);
 
-	// Permitimos que OpenGL use el Z-Buffer
-	glEnable(GL_DEPTH_TEST);
+	// Damos un color base al fondo para que no salga negro puro
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+	// Cargamos nuestros shaders basicos
+	Shader ourShader("./Shaders/vertex_shader_basico.vs", "./Shaders/fragment_shader_basico.fs");
 
 	// Inicializamos el bucle de renderizado
 	while (!glfwWindowShouldClose(window)) {
 		// Tenemos que limpiar tambien el Z-Buffer ahora cada iteracion
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 		// Le indicamos a OpenGL que vamos a usar nuestro shader
 		ourShader.use();
-
-		// Activamos y enlazamos nuestra textura y nuestro Array Buffer
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture[0]);
-		glBindVertexArray(VAO);
 
 		// Iteramos una vez por cada caja
 		for (unsigned int i = 0; i < 10; i++) {
@@ -218,14 +187,19 @@ int main() {
 			// Lo rotamos segun ese angulo para que este girando
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			// Metemos las matrices en los uniforms
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
-			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
-			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
-			ourShader.set4Float("ourColor", 0.0f, 1.0f, 0.0f, 1.0f);
-			ourShader.setInt("texture2", 1);
+			ourShader.setMatrix4fv("model", value_ptr(model));
+			ourShader.setMatrix4fv("view", value_ptr(view));
+			ourShader.setMatrix4fv("projection", value_ptr(projection));
+			// Metemos un color distinto cada vez, siguiendo el bucle
+			ourShader.set4Float("ourColor", cubeColors[i].r, cubeColors[i].g, cubeColors[i].b, cubeColors[i].a);
 
 			// Dibujamos cada cubo
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawElements(
+				GL_TRIANGLES,    // El tipo de primitiva
+				36,              // El número total de vértices a dibujar
+				GL_UNSIGNED_INT, // El tipo de los indices
+				0                // Si hay un offset a la hora de leer los indices
+			);
 		}
 
 		glfwPollEvents();
