@@ -14,6 +14,7 @@ fase2.o:
 
 clean:
 	rm -rf ./fase2.o
+	rm -rf ./shader.o
 	rm -f ./build
 	rm -f ./libs/build
 	clear

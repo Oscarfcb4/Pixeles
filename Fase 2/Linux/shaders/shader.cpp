@@ -30,7 +30,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath){
 	// Lo pasamos a cadenas de char y nos llevamos el puntero donde empiezan
 	const char* vShaderCode = vertexCode.c_str();
 	const char* fShaderCode = fragmentCode.c_str();
-	// Ahora con todod leido vamos a compilar y linkar
+	// Ahora con todo leido vamos a compilar y linkar
 	unsigned int vertex, fragment;
 	int success;
 	char infoLog[512];
@@ -95,4 +95,8 @@ void Shader::setFloat(const string &name, float value) const{
 
 void Shader::set4Float(const string &name, float value1, float value2, float value3, float value4) const{
 	glUniform4f(glGetUniformLocation(ID, name.c_str()), value1, value2, value3, value4);
+}
+
+void Shader::setMatrix4fv(const std::string &name, const GLfloat *matrix) const {
+	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, matrix);
 }
