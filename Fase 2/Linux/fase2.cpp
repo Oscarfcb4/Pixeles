@@ -159,13 +159,16 @@ int main() {
 	// Damos un color base al fondo para que no salga negro puro
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
+	// Activamos el testeo de profundidad antes del bucle de renderizado
+	glEnable(GL_DEPTH_TEST);
+
 	// Cargamos nuestros shaders basicos
 	Shader ourShader("./shaders/vertex_shader_basico.vs", "./shaders/fragment_shader_basico.fs");
 
 	// Inicializamos el bucle de renderizado
 	while (!glfwWindowShouldClose(window)) {
-		// Tenemos que limpiar tambien el Z-Buffer ahora cada iteracion
-		glClear(GL_COLOR_BUFFER_BIT);
+		// Ahora tenemos que limpiar tambien el Z-Buffer ahora cada iteracion
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// Le indicamos a OpenGL que vamos a usar nuestro shader
 		ourShader.use();
 
