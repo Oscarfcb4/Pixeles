@@ -1,7 +1,14 @@
 #include "Fase3.h"
+#include "./SceneTree/sceneTree.hpp"
 
 
-
+std::unique_ptr<TNode> sceneRoot{};
+TNode* getSceneRoot() { return sceneRoot.get(); };
+GLFWwindow* mainWindow{};
+// Instancia del gestor de recursos
+TResourceManager RM{};
+// Vectores para almacenar los nodos, necesario para gestionar y encapsular las responsabilidades de la destruccion de la memoria
+std::vector<std::unique_ptr<TNode>> nodes{};
 
 int main() {
 	glfwInit();
@@ -23,6 +30,10 @@ int main() {
 		std::cout << "Ha fallado la inicializacion de GLAD" << std::endl;
 		return 0;
 	}
+
+
+	sceneRoot = std::make_unique<TNode>();
+	RM.setScene(sceneRoot.get());
 
 	glViewport(0, 0, ANCHO, ALTO);
 
@@ -74,43 +85,11 @@ int main() {
 
 	// Inicializamos el bucle de renderizado
 	while (!glfwWindowShouldClose(window)) {
-		// Tenemos que limpiar tambien el Z-Buffer ahora cada iteracion
-		glClear(GL_COLOR_BUFFER_BIT);
-		// Le indicamos a OpenGL que vamos a usar nuestro shader
-		ourShader.use();
-
-		// Iteramos una vez por cada caja
-		for (unsigned int i = 0; i < 10; i++) {
-			// Inicializamos la matriz modelo, para que vuelva a 0 cada vez
-			glm::mat4 model{ glm::mat4(1.0f) };
-			// Cogemos las posiciones de nuestro array de posiciones segun el bucle y lo
-			// usamos para transladar la matriz modelo
-			model = translate(model, cubePositions[i]);
-			// Un angulo de rotacion diferente para cada cubo y segun el tiempo de ejecucion
-			float angle{};
-			if (i > 0) {
-				angle = glfwGetTime() * 20.0f * i;
-			}
-			else {
-				angle = glfwGetTime() * 20.0f;
-			}
-			// Lo rotamos segun ese angulo para que este girando
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			// Metemos las matrices en los uniforms
-			ourShader.setMatrix4fv("model", value_ptr(model));
-			ourShader.setMatrix4fv("view", value_ptr(view));
-			ourShader.setMatrix4fv("projection", value_ptr(projection));
-			// Metemos un color distinto cada vez, siguiendo el bucle
-			ourShader.set4Float("ourColor", cubeColors[i].r, cubeColors[i].g, cubeColors[i].b, cubeColors[i].a);
-
-			// Dibujamos cada cubo
-			glDrawElements(
-				GL_TRIANGLES,    // El tipo de primitiva
-				36,              // El número total de vértices a dibujar
-				GL_UNSIGNED_INT, // El tipo de los indices
-				0                // Si hay un offset a la hora de leer los indices
-			);
-		}
+		
+		// Por si acaso
+		glEnable(GL_DEPTH_TEST);
+		// Recorremos el arbol
+		sceneRoot->traversal(glm::mat4{ 1.0f }, sceneRoot->getPrincipalCamera());
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
