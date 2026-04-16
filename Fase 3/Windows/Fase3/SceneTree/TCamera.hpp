@@ -8,8 +8,8 @@ enum cameraMovement{
 
 struct TCamera: virtual public TEntity{
     // Constructor de la camara, inicializa todo lo necesario para que la camara 3D pueda usarse para renderizar
-    TCamera(Vec3 position_ = Vec3(0.0f, 0.0f, 0.0f), Vec3 up_ = Vec3(0.0f, 1.0f, 0.0f), float yaw_ = -90.0f, float pitch_ = 0.0f)
-        : front(Vec3(0.0f, 0.0f, -1.0f)), movementSpeed(0.1f), mouseSensitivity(0.1f), zoom(45.0f){
+    TCamera(glm::vec3 position_ = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f), float yaw_ = -90.0f, float pitch_ = 0.0f)
+        : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(0.1f), mouseSensitivity(0.1f), zoom(45.0f){
         position = position_;
         worldUp = up_;
         yaw = yaw_;
@@ -20,10 +20,10 @@ struct TCamera: virtual public TEntity{
     // Metodo que calcula la matriz vista usando el metodo lookAt
     glm::mat4 getViewMatrix(){
         glm::vec3 pos{position.x, position.y, position.z};
-        Vec3 aux{position + front};
+        glm::vec3 aux{position + front};
         glm::vec3 right{aux.x, aux.y, aux.z};
-        glm::vec3 up_{up.x, up.y, up.z};
-        return glm::lookAt(pos, right, up_);
+        glm::vec3 up_{up.x, up.y, up.z};              
+        return glm::lookAt(pos, aux, up_);
     };
 
     // Si el usuario cambia el Front o el Up de la camara, este metodo actualizara el resto de datos
@@ -32,8 +32,8 @@ struct TCamera: virtual public TEntity{
     }
 
     // Posiciona la camara mirando a una posicion en especifico
-    void toTarget(Vec3 target){
-        front = Vec3(target.x - position.x, target.y - position.y, target.z - position.z);
+    void toTarget(glm::vec3 target){
+        front = glm::vec3(target.x - position.x, target.y - position.y, target.z - position.z);
     }
 
     // Aqui el usuario podra mover la camara segun un delta time, asegurando un movimiento estable respecto al framerate
@@ -82,15 +82,15 @@ struct TCamera: virtual public TEntity{
 
     // Datos de la camara
     // La posicion en el mundo
-    Vec3 position{};
+    glm::vec3 position{};
     // Vector que apunta hacia donde mira la camara
-    Vec3 front{};
+    glm::vec3 front{};
     // Vector que apunta hacia arriba desde la camara
-    Vec3 up{};
+    glm::vec3 up{};
     // Vector que apunta hacia la derecha desde la camara
-    Vec3 right{};
+    glm::vec3 right{};
     // Vector que apunta hacia arriba desde la camara en respecto al mundo
-    Vec3 worldUp{};
+    glm::vec3 worldUp{};
     // Valores de Euler
     float yaw{};
     float pitch{};
@@ -108,10 +108,10 @@ struct TCamera: virtual public TEntity{
             frontVec.z = static_cast<float>(sin(glm::radians(yaw)) * cos(glm::radians(pitch)));
 
             glm::vec3 aux{glm::normalize(frontVec)};
-            front = Vec3(aux.x, aux.y, aux.z);
+            front = glm::vec3(aux.x, aux.y, aux.z);
             glm::vec3 aux2{glm::normalize(glm::cross(aux, glm::vec3(worldUp.x, worldUp.y, worldUp.z)))};
-            right = Vec3(aux2.x, aux2.y, aux2.z);
+            right = glm::vec3(aux2.x, aux2.y, aux2.z);
             aux = glm::normalize(glm::cross(aux2, aux));
-            up = Vec3(aux.x, aux.y, aux.z);
+            up = glm::vec3(aux.x, aux.y, aux.z);
         };
 };

@@ -26,16 +26,16 @@ typedef struct Color {
 // Guardamos las posiciones de los vertices para crear una caja
 float vertices[] = {
 	// Cara delantera (z = 0.5)
-	-0.5f,  0.5f,  0.5f,  // Vértice 3 (Esquina superior izquierda)
-	 0.5f,  0.5f,  0.5f,  // Vértice 2 (Esquina superior derecha)
-	-0.5f, -0.5f,  0.5f,  // Vértice 0 (Esquina inferior izquierda)
-	 0.5f, -0.5f,  0.5f,  // Vértice 1 (Esquina inferior derecha)
+	-0.5f,  0.5f,  0.5f,  // Vértice 0 (Esquina superior izquierda)
+	 0.5f,  0.5f,  0.5f,  // Vértice 1 (Esquina superior derecha)
+	-0.5f, -0.5f,  0.5f,  // Vértice 2 (Esquina inferior izquierda)
+	 0.5f, -0.5f,  0.5f,  // Vértice 3 (Esquina inferior derecha)
 
 	// Cara trasera (Eje Z = -0.5)
-	-0.5f,  0.5f, -0.5f,  // Vértice 7 
-	 0.5f,  0.5f, -0.5f,  // Vértice 6 
-	-0.5f, -0.5f, -0.5f,  // Vértice 4 
-	 0.5f, -0.5f, -0.5f   // Vértice 5 
+	-0.5f,  0.5f, -0.5f,  // Vértice 4 
+	 0.5f,  0.5f, -0.5f,  // Vértice 5 
+	-0.5f, -0.5f, -0.5f,  // Vértice 6 
+	 0.5f, -0.5f, -0.5f   // Vértice 7 
 };
 
 // El orden de las caras en el cubo

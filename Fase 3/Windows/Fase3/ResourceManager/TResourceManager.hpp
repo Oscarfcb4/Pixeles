@@ -1,8 +1,4 @@
 #pragma once
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <stb_image.h>
 #include "TAllResources.hpp"
 
 struct TNode;
@@ -70,7 +66,7 @@ struct TResourceManager{
     }
 
     // Vector que almacena las texturas cargadas
-    std::vector<_Texture> texturesLoaded{};
+    std::vector<Texture> texturesLoaded{};
     private:
         // Vector de recursos, NECESITA que sean shared y no unique para poder usar los metodos static_pointer_cast y dynamic_pointer_cast
         // y asi poder aprovechar el polimorfismo

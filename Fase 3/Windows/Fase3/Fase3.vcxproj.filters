@@ -6,6 +6,12 @@
     <ClCompile Include="Shaders\shader.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="ResourceManager\ResourceManager.cpp">
+      <Filter>ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneTree\SceneTree.cpp">
+      <Filter>SceneTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ResourceManager\TAllResources.hpp">
@@ -38,7 +44,13 @@
     <ClInclude Include="SceneTree\TEntity.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
-    <ClInclude Include="Fase3.h" />
+    <ClInclude Include="Fase3.hpp" />
+    <ClInclude Include="ResourceManager\TR_Model.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTree\TModel.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\fragment_shader_basico.fs">

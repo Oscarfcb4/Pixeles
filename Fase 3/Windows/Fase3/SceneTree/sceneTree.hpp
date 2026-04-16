@@ -1,5 +1,4 @@
 #pragma once
-#include "../InazumaTypes.hpp"
 #include "../Shaders/shader.hpp"
 #include "../ResourceManager/TResourceManager.hpp"
 #include "TEntities.hpp"
@@ -18,9 +17,9 @@ struct TNode{
     TEntity* getEntity(){return entity;};
 
     // Metodos para la transformacion del nodo
-    void translate(Vec3 translate);
-    void rotate(Vec4 rotation);
-    void scale(Vec3 scaleM);
+    void translate(glm::vec3 translate);
+    void rotate(glm::vec4 rotation);
+    void scale(glm::vec3 scaleM);
     void setTransMatrix(glm::mat4 transMatrix_){transMatrix = transMatrix_;};
     glm::mat4 getTransMatrix(){return transMatrix;};
 
@@ -39,5 +38,5 @@ struct TNode{
         TCamera* pCamera{};
         glm::mat4 transMatrix{1.0f};
         // Solo hace el calculo de la matriz acumulada si este nodo ha sido cambiado
-        bool updated{};
+        bool updated{true};
 };

@@ -142,6 +142,8 @@
   <ItemGroup>
     <ClCompile Include="Fase3.cpp" />
     <ClCompile Include="Librerias\GLAD\src\glad.c" />
+    <ClCompile Include="ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="SceneTree\SceneTree.cpp" />
     <ClCompile Include="Shaders\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -149,16 +151,18 @@
     <None Include="Shaders\vertex_shader_basico.vs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Fase3.h" />
+    <ClInclude Include="Fase3.hpp" />
     <ClInclude Include="ResourceManager\TAllResources.hpp" />
     <ClInclude Include="ResourceManager\TResource.hpp" />
     <ClInclude Include="ResourceManager\TResourceManager.hpp" />
     <ClInclude Include="ResourceManager\TR_Mesh.hpp" />
+    <ClInclude Include="ResourceManager\TR_Model.hpp" />
     <ClInclude Include="ResourceManager\TR_Shader.hpp" />
     <ClInclude Include="SceneTree\sceneTree.hpp" />
     <ClInclude Include="SceneTree\TCamera.hpp" />
     <ClInclude Include="SceneTree\TEntities.hpp" />
     <ClInclude Include="SceneTree\TEntity.hpp" />
+    <ClInclude Include="SceneTree\TModel.hpp" />
     <ClInclude Include="Shaders\shader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

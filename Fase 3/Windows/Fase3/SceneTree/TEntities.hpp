@@ -5,5 +5,4 @@
 
 #include "TEntity.hpp"
 #include "TCamera.hpp"
-#include "TLight.hpp"
 #include "TModel.hpp"

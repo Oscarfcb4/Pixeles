@@ -3,7 +3,7 @@
 // Los tipos de recursos que acepta el gestor de recursos
 
 enum RType{
-	TRModel, TRShader, TRCube, TRImage
+	TRShader, TRCube
 };
 
 #include "TResource.hpp"

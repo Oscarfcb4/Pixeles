@@ -1,7 +1,7 @@
 #pragma once
 
 struct TNode;
-struct _Texture;
+struct Texture;
 
 // Metodo general de recursos, que lo heredaran todos los recursos
 struct TResource{
@@ -14,7 +14,7 @@ struct TResource{
     // Setea la escena
     void setScene(TNode* node){scene = node;};
     // Metodo de carga generico, los parametros tendran mas o menos valor segun el recurso
-    virtual void load(const std::string& name, [[maybe_unused]] std::vector<_Texture>& texturesLoaded, [[maybe_unused]] RType rt) = 0;
+    virtual void load(const std::string& name, [[maybe_unused]] std::vector<Texture>& texturesLoaded, [[maybe_unused]] RType rt) = 0;
     
     // Nombre del recurso, importante para no repetir recursos
     std::string name{};

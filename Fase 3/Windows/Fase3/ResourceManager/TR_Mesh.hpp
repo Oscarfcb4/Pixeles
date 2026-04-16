@@ -4,12 +4,10 @@
 // Clase Vertex, que contiene la informacion de un punto 3D necesario para el renderizado en OpenGL
 struct Vertex{
 	glm::vec3 position{};
-	glm::vec3 normal{};
-	glm::vec2 texCord{};
 };
 
 // Clase textura, con lo necesario para el renderizado de en OpenGL
-struct _Texture{
+struct Texture{
 	unsigned int id{};
 	std::string type{};
 	std::string path{};
@@ -18,7 +16,7 @@ struct _Texture{
 // Clase malla
 struct TR_Mesh{
     // Constructor con un vector de Vertex, indices y texturas
-	TR_Mesh(std::vector<Vertex> vertices_, std::vector<unsigned int> indices_, std::vector<_Texture> textures_){
+	TR_Mesh(std::vector<Vertex> vertices_, std::vector<unsigned int> indices_, std::vector<Texture> textures_){
     	vertices = vertices_;
     	indices = indices_;
     	textures = textures_;
@@ -27,30 +25,7 @@ struct TR_Mesh{
     };
 
     // Metodo de dibujado en OpenGL
-	void draw(_Shader& shader){
-        // Inicializamos los contadores para las texturas difusas y especulares
-        uint16_t diffuseNr{1};
-        uint16_t specularNr{1};
-        // Por cada una de las texturasm se la vamos pasando a OpenGL siguiendo un sistema donde sabemos que la 0 es la 
-        // textura base del color por lo que el resto deben ser de 1 para arriba por lo que con cada textura que enviamos
-        // vamos aumentando los contadores
-        for(uint16_t i{}; i<textures.size(); i++){
-            // Activamos la textura con el contador
-            glActiveTexture(GL_TEXTURE0 + i);
-            // Segun el tipo, cogemos el numero del contador de difusas o el de especulares
-            std::string number{};
-            std::string name{textures[i].type};
-            if(name == "texture_diffuse")
-                number = std::to_string(diffuseNr++);
-            else if(name == "texture_specular")
-                number = std::to_string(specularNr++);
-            // Se lo mandamos al shader
-            shader.setFloat(("material." + name + number).c_str(), static_cast<float>(i));
-            // Y anidamos la textura
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
-        }
-        // Activamos la textura inicial
-        glActiveTexture(GL_TEXTURE0);
+	void draw(Shader& shader){
         // Anidamos el Vertex Array Object
         glBindVertexArray(VAO);
         // Dibujamos los triangulos segun los indices
@@ -65,7 +40,7 @@ struct TR_Mesh{
     // Los vectores con la informacion almacenada
 	std::vector<Vertex> vertices{};
 	std::vector<unsigned int> indices{};
-	std::vector<_Texture> textures{};
+	std::vector<Texture> textures{};
 
 	private:
         // Seteamos los buffers necesarios para el renderizado de OpenGL
@@ -92,14 +67,6 @@ struct TR_Mesh{
             // Position
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-
-            // Normal
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-
-            // _Texture
-            glEnableVertexAttribArray(2);
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCord));	
 
             // Desenlazo el VBO
             glBindVertexArray(0);
