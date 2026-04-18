@@ -1,39 +1,32 @@
 #include "Fase3.hpp"
-#include "./SceneTree/sceneTree.hpp"
+#include "./SceneTree/SceneTree.hpp"
 
 // La ventana principal
 GLFWwindow* window{};
 // La raíz del árbol
-std::unique_ptr<TNode> sceneRoot{};
+std::unique_ptr<Node> sceneRoot{};
 // Instancia del gestor de recursos
-TResourceManager RM{};
+ResourceManager RM{};
 
 // La relación de aspecto, que será usada en varias partes
 float aspect{ static_cast<float>(ANCHO) / static_cast<float>(ALTO) };
 
-// Vectores para almacenar los nodos, necesario para gestionar y encapsular las responsabilidades de la destruccion de la memoria
-std::vector<std::unique_ptr<TNode>> nodes{};
-std::vector<std::unique_ptr<TCamera>> cameras{};
-std::vector<std::unique_ptr<TModel>> models{};
+// Variables para deltaTime
+float lastFrame{};
+float deltaTime{};
 
-// El color del fondo, para evitar recalcularlo si es el mismo
-Color colorFondo;
-
-// La velocidad de la cámara, 
-float speed{ 1.0f };
-
-// Guardamos las posiciones anteriores del ratón
-float lastX{}, lastY{};
-// Si es la primera lectura del ratón
-bool firstMouse{ true };
+// Vectores para almacenar los nodos, camaras y modelos
+std::vector<std::unique_ptr<Node>> nodes{};
+std::vector<std::unique_ptr<E_Camera>> cameras{};
+std::vector<std::unique_ptr<E_Model>> models{};
 
 // Los métodos para crear cubos y para crear cámaras
-TNode* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm::vec3 rotAxis) {
-	auto nodeCube = std::make_unique<TNode>();
+Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm::vec3 rotAxis) {
+	auto nodeCube = std::make_unique<Node>();
 	nodes.push_back(std::move(nodeCube));
 	auto& nCube = nodes[nodes.size() - 1];
 	// Como siempre va a ser igual le pasamos ya las cosas por el constructor
-	auto entityModel = std::make_unique<TModel>(&RM, "Cubo", RType::TRCube);
+	auto entityModel = std::make_unique<E_Model>(&RM, "Cubo", RType::TRCube);
 	models.push_back(std::move(entityModel));
 	auto& eCube = models[models.size() - 1];
 	// El cubo siempre va a tener solo un shader, el base
@@ -43,24 +36,22 @@ TNode* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, gl
 	nCube->rotate(glm::vec4(rotAxis.x, rotAxis.y, rotAxis.z, rotAngle));
 	nCube->scale(glm::vec3(size.x / 2, size.y / 2, size.z / 2));
 	// Le ponemos el color
-	eCube->color.x = color.r;
-	eCube->color.y = color.g;
-	eCube->color.z = color.b;
+	eCube->color = color;
 	eCube->setAspect(aspect);
 	nCube->setEntity(std::move(eCube.get()));
 	sceneRoot->addChild(std::move(nCube.get()));
 	return sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1];
 }
 
-TNode* createCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) {
+Node* createCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) {
 	// Creamos un nodo como un puntero unico
-	auto nodeCam = std::make_unique<TNode>();
+	auto nodeCam = std::make_unique<Node>();
 	// Lo pusheamos al vector de nodos y le pasamos la responsabilidad de memoria
 	nodes.push_back(std::move(nodeCam));
 	// Lo recuperamos como una referencia para trabajar con el
 	auto& nCam = nodes[nodes.size() - 1];
 	// Creamos la entidad 
-	auto entityCam = std::make_unique<TCamera>(position, up, yaw, pitch);
+	auto entityCam = std::make_unique<E_Camera>(position, up, yaw, pitch);
 	// Lo pusheamos y le pasamos la responsabilidad de memoria
 	cameras.push_back(std::move(entityCam));
 	// La recuperamos como referencia
@@ -77,6 +68,9 @@ TNode* createCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) {
 	return sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1];
 }
 
+// El color del fondo, para evitar recalcularlo si es el mismo
+Color colorFondo;
+
 // Método donde encapsulamos la responsabilidad de limpiar el fondo
 void cleanBackground(Color c) {
 	// Como las divisiones son costosas, guardamos una copia del color y solo dividimos si el color que le pasas es diferente al ultimo
@@ -90,6 +84,9 @@ void cleanBackground(Color c) {
 	// Limpiamos el buffer de color y el buffer de profundidad
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
+
+// La velocidad de la cámara, 
+float speed{ 1.0f };
 
 void processInput() {
 	if(glfwGetKey(window, GLFW_KEY_W)) {
@@ -108,6 +105,11 @@ void processInput() {
 		glfwSetWindowShouldClose(window, true);
 	}
 }
+
+// Guardamos las posiciones anteriores del ratón
+float lastX{}, lastY{};
+// Si es la primera lectura del ratón
+bool firstMouse{ true };
 
 void mouse_callback([[maybe_unused]] GLFWwindow* window, double xPosIn, double yPosIn) {
 	float xPos{ static_cast<float>(xPosIn) };
@@ -159,26 +161,33 @@ bool configurarOpenGL() {
 
 int main() {
 	
+	// Llamamos a nuestra función que configura OpenGL
 	if (!configurarOpenGL())
 		return -1;
 
-	sceneRoot = std::make_unique<TNode>();
+	// Iniciamos al raiz del arbol de la escena
+	sceneRoot = std::make_unique<Node>();
+	// Le decimos a nuestro Resource Manager que esta es nuestra raíz
 	RM.setScene(sceneRoot.get());
 	// Cargamos nuestros shaders basicos
 	Shader* basicShader = &RM.getShader("base", "./Shaders/vertex_shader_basico.vs", "./Shaders/fragment_shader_basico.fs")->shader;
-	TNode* camara = createCamera(glm::vec3(-0.3f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
+	// Creamos la cámara principal
+	Node* camara = createCamera(glm::vec3(-0.3f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 
-	std::vector<TNode*> cubos{};
-	TNode* cubo1  = createCube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo2  = createCube(glm::vec3(2.0f, 5.0f, -15.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo3  = createCube(glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo4  = createCube(glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo5  = createCube(glm::vec3(2.4f, -0.4f, -3.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo6  = createCube(glm::vec3(-1.7f, 3.0f, -7.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo7  = createCube(glm::vec3(1.3f, -2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 1.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo8  = createCube(glm::vec3(1.5f, 2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo9  = createCube(glm::vec3(1.5f, 0.2f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.5f, 0.5f, 0.5f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	TNode* cubo10 = createCube(glm::vec3(-1.3f, 1.0f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.5f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	// Creamos los cubos, igual que en la Fase2
+	std::vector<Node*> cubos{};
+	Node* cubo1  = createCube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo2  = createCube(glm::vec3(2.0f, 5.0f, -15.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo3  = createCube(glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo4  = createCube(glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo5  = createCube(glm::vec3(2.4f, -0.4f, -3.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo6  = createCube(glm::vec3(-1.7f, 3.0f, -7.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo7  = createCube(glm::vec3(1.3f, -2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 1.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo8  = createCube(glm::vec3(1.5f, 2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo9  = createCube(glm::vec3(1.5f, 0.2f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.5f, 0.5f, 0.5f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo10 = createCube(glm::vec3(-1.3f, 1.0f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.5f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	
+	// Nos guardamos los cubos para iterar luego
 	cubos.push_back(cubo1);
 	cubos.push_back(cubo2);
 	cubos.push_back(cubo3);
@@ -192,19 +201,29 @@ int main() {
 
 	// Inicializamos el bucle de renderizado
 	while (!glfwWindowShouldClose(window)) {
+		// Controlamos el input del usuario
 		processInput();
+		// Limpiamos el fondo
 		cleanBackground(Color(100.0f, 100.0f, 100.0f, 255.0f));
 
+		// Calculamos el deltaTime
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		// Iteramos por cada cubo
 		for (unsigned int i = 0; i < 10; i++) {
-			TNode* cubo = cubos.at(i);
-			float angle{};
+			// Lo mismo que la fase2, pero usando los nodos de nuestro árbol
+			Node* cubo = cubos.at(i);
+			float frameAngle{};
+			float rotationSpeed{2000.0f};
 			if (i > 0) {
-				angle = glfwGetTime() * 20 * i;
+				frameAngle = deltaTime * rotationSpeed * static_cast<float>(i);
 			}
 			else {
-				angle = glfwGetTime() * 20;
+				frameAngle = deltaTime * rotationSpeed;
 			}
-			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, glm::radians(angle)));
+			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, glm::radians(frameAngle)));
 		}
 
 		// Recorremos el arbol

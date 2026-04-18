@@ -6,7 +6,7 @@
 #include <gtc/type_ptr.hpp>
 #include <iostream>
 #include <string>
-#include <shader.hpp>
+#include <Shader.hpp>
 
 constexpr unsigned int ANCHO{ 1280 };
 constexpr unsigned int ALTO{ 720 };

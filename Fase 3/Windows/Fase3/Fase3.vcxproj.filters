@@ -3,7 +3,7 @@
   <ItemGroup>
     <ClCompile Include="Fase3.cpp" />
     <ClCompile Include="Librerias\GLAD\src\glad.c" />
-    <ClCompile Include="Shaders\shader.cpp">
+    <ClCompile Include="Shaders\Shader.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager\ResourceManager.cpp">
@@ -14,41 +14,41 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ResourceManager\TAllResources.hpp">
+    <ClInclude Include="ResourceManager\R_AllResources.hpp">
       <Filter>ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager\TR_Mesh.hpp">
+    <ClInclude Include="ResourceManager\R_Mesh.hpp">
       <Filter>ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager\TR_Shader.hpp">
+    <ClInclude Include="ResourceManager\R_Shader.hpp">
       <Filter>ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager\TResource.hpp">
+    <ClInclude Include="ResourceManager\R_Resource.hpp">
       <Filter>ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager\TResourceManager.hpp">
+    <ClInclude Include="ResourceManager\ResourceManager.hpp">
       <Filter>ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\shader.hpp">
+    <ClInclude Include="Shaders\Shader.hpp">
       <Filter>Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="SceneTree\sceneTree.hpp">
+    <ClInclude Include="SceneTree\SceneTree.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
-    <ClInclude Include="SceneTree\TCamera.hpp">
+    <ClInclude Include="SceneTree\E_Camera.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
-    <ClInclude Include="SceneTree\TEntities.hpp">
+    <ClInclude Include="SceneTree\E_AllEntities.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
-    <ClInclude Include="SceneTree\TEntity.hpp">
+    <ClInclude Include="SceneTree\E_Entity.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
     <ClInclude Include="Fase3.hpp" />
-    <ClInclude Include="ResourceManager\TR_Model.hpp">
+    <ClInclude Include="ResourceManager\R_Model.hpp">
       <Filter>ResourceManager</Filter>
     </ClInclude>
-    <ClInclude Include="SceneTree\TModel.hpp">
+    <ClInclude Include="SceneTree\E_Model.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
   </ItemGroup>

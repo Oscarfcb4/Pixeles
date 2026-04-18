@@ -1,20 +1,20 @@
 #pragma once
 #include "../Shaders/shader.hpp"
-#include "../ResourceManager/TResourceManager.hpp"
-#include "TEntities.hpp"
+#include "../ResourceManager/ResourceManager.hpp"
+#include "E_AllEntities.hpp"
 
 // Clase nodo, con todo lo necesario para gestionar el arbol
 
-struct TNode{
+struct Node{
     // Metodo para la gestion de los hijos 
-    uint32_t addChild(TNode* newNode);
-    uint32_t removeChild(TNode* remNode);
-    std::vector<TNode*>& getChildren(){return childs;};
-    TNode* getDad(){return dad;};
+    uint32_t addChild(Node* newNode);
+    uint32_t removeChild(Node* remNode);
+    std::vector<Node*>& getChildren(){return childs;};
+    Node* getDad(){return dad;};
 
     // Cada nodo puede tener un tipo de entidad asignada, estos metodos ayudan a gestionarlo
-    bool setEntity(TEntity* newEntity);
-    TEntity* getEntity(){return entity;};
+    bool setEntity(E_Entity* newEntity);
+    E_Entity* getEntity(){return entity;};
 
     // Metodos para la transformacion del nodo
     void translate(glm::vec3 translate);
@@ -24,18 +24,18 @@ struct TNode{
     glm::mat4 getTransMatrix(){return transMatrix;};
 
     // Metodo que recorre el arbol y dibuja todos sus hijos teniendo en cuenta una camara, normalmente de uso exlusivo de la raiz
-    void traversal(glm::mat4 cumulativeMatrix, TCamera* prCamera);
+    void traversal(glm::mat4 cumulativeMatrix, E_Camera* principalCamera);
 
     // Metodo para recuperar y asignar una camara principal, de nuevo solo util en la raiz
-    void setPrincipalCamera(TCamera* newPCamera){pCamera = newPCamera;};
-    TCamera* getPrincipalCamera(){return pCamera;};
+    void setPrincipalCamera(E_Camera* newPCamera){principalCamera = newPCamera;};
+    E_Camera* getPrincipalCamera(){return principalCamera;};
 
     private:
         // Almacenamiento de la estructura del arbol y sus entidades
-        TEntity* entity{};
-        std::vector<TNode*> childs{};
-        TNode* dad{};
-        TCamera* pCamera{};
+        E_Entity* entity{};
+        std::vector<Node*> childs{};
+        Node* dad{};
+        E_Camera* principalCamera{};
         glm::mat4 transMatrix{1.0f};
         // Solo hace el calculo de la matriz acumulada si este nodo ha sido cambiado
         bool updated{true};

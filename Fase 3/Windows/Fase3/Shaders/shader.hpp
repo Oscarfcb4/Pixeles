@@ -18,7 +18,8 @@ struct Shader{
 
 	// Activa o desactiva el shader
 	void use();
-	// Para declarar uniforms
+
+	// Para declarar uniforms, un poco más completo que en la Fase2
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;

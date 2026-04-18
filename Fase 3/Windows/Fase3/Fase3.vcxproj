@@ -144,7 +144,7 @@
     <ClCompile Include="Librerias\GLAD\src\glad.c" />
     <ClCompile Include="ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="SceneTree\SceneTree.cpp" />
-    <ClCompile Include="Shaders\shader.cpp" />
+    <ClCompile Include="Shaders\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\fragment_shader_basico.fs" />
@@ -152,18 +152,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Fase3.hpp" />
-    <ClInclude Include="ResourceManager\TAllResources.hpp" />
-    <ClInclude Include="ResourceManager\TResource.hpp" />
-    <ClInclude Include="ResourceManager\TResourceManager.hpp" />
-    <ClInclude Include="ResourceManager\TR_Mesh.hpp" />
-    <ClInclude Include="ResourceManager\TR_Model.hpp" />
-    <ClInclude Include="ResourceManager\TR_Shader.hpp" />
-    <ClInclude Include="SceneTree\sceneTree.hpp" />
-    <ClInclude Include="SceneTree\TCamera.hpp" />
-    <ClInclude Include="SceneTree\TEntities.hpp" />
-    <ClInclude Include="SceneTree\TEntity.hpp" />
-    <ClInclude Include="SceneTree\TModel.hpp" />
-    <ClInclude Include="Shaders\shader.hpp" />
+    <ClInclude Include="ResourceManager\R_AllResources.hpp" />
+    <ClInclude Include="ResourceManager\R_Resource.hpp" />
+    <ClInclude Include="ResourceManager\ResourceManager.hpp" />
+    <ClInclude Include="ResourceManager\R_Mesh.hpp" />
+    <ClInclude Include="ResourceManager\R_Model.hpp" />
+    <ClInclude Include="ResourceManager\R_Shader.hpp" />
+    <ClInclude Include="SceneTree\SceneTree.hpp" />
+    <ClInclude Include="SceneTree\E_Camera.hpp" />
+    <ClInclude Include="SceneTree\E_AllEntities.hpp" />
+    <ClInclude Include="SceneTree\E_Entity.hpp" />
+    <ClInclude Include="SceneTree\E_Model.hpp" />
+    <ClInclude Include="Shaders\Shader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
