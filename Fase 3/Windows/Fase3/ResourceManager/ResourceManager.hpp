@@ -20,7 +20,7 @@ struct ResourceManager{
     Node* getScene(){return scene;};
 
     // Metodos de carga, son tameplates que luego se aprovecharan mas si 
-    // separas los modelos en tipos más específicos y tu motor crezca
+    // separas los modelos en tipos más específicos cuando tu motor crezca
     template <class ResourceType>
     ResourceType* getResource(std::string name, std::string src, RType rt){
         // Buscamos en el vector de recursos con un iterador
@@ -50,7 +50,7 @@ struct ResourceManager{
         return  std::dynamic_pointer_cast<ResourceType>(*it).get(); 
     }
 
-    // El de los shaders requiere uno especial, lo he hecho así para agilizar
+    // El de los shaders lo he hecho diferente para agilizar
     // pero se podría hacer un método general
     template <class ResourceType>
     ResourceType* getResource(std::string name, std::string vs, std::string fs){
@@ -62,6 +62,8 @@ struct ResourceManager{
             return false;
         });
         if(it == resources.end()){
+            // Como es sí o sí un R_Shader por los parámetros, sabemos que el constructor
+            // recibirá los parámetros como el constructor de la clase Shader de la Fase 2
             auto newRec = std::make_shared<ResourceType>(vs.c_str(), fs.c_str());
             newRec->setName(name);
             newRec->setScene(scene);

@@ -26,7 +26,7 @@ Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm
 	nodes.push_back(std::move(nodeCube));
 	auto& nCube = nodes[nodes.size() - 1];
 	// Como siempre va a ser igual le pasamos ya las cosas por el constructor
-	auto entityModel = std::make_unique<E_Model>(&RM, "Cubo", RType::TRCube);
+	auto entityModel = std::make_unique<E_Model>(&RM, "Cubo", RType::RCube);
 	models.push_back(std::move(entityModel));
 	auto& eCube = models[models.size() - 1];
 	// El cubo siempre va a tener solo un shader, el base

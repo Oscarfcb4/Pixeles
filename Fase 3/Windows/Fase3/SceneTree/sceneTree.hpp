@@ -36,6 +36,7 @@ struct Node{
         std::vector<Node*> childs{};
         Node* dad{};
         E_Camera* principalCamera{};
+        // Su transformación local (empieza por la identidad)
         glm::mat4 transMatrix{1.0f};
         // Solo hace el calculo de la matriz acumulada si este nodo ha sido cambiado
         bool updated{true};

@@ -9,7 +9,7 @@ struct R_Model: virtual public R_Resource{
 
 	// Metodo de dibujado, requiere de un shader que se le pasara desde E_Model
 	void drawWithShader(Shader& shader){
-		// Para cada una de sus mallas, llama a su meto de deibujado con el mismo shader
+		// Para cada una de sus mallas, llama a su método de dibujado con el mismo shader
 		for(unsigned int i{}; i<meshes.size(); i++)
 			meshes[i].draw(shader);
 	};
@@ -19,7 +19,7 @@ struct R_Model: virtual public R_Resource{
 		// Asignamos el tipo de recurso
 		type = rt;
 		// Segun el tipo de recursos hace una cosa u otra
-		if (rt == RType::TRCube) {
+		if (rt == RType::RCube) {
 			// Metemos en una mesh el cubo
 			meshes.push_back(processCube());
 		}

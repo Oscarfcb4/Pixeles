@@ -1,7 +1,6 @@
 #pragma once
 
 struct Node;
-struct Texture;
 
 // Metodo general de recursos, que lo heredaran todos los recursos
 struct R_Resource{

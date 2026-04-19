@@ -2,17 +2,18 @@
 
 // Anade el hijo pasado como parametro al nodo actual y devuelve la cantidad de hijos
 uint32_t Node::addChild(Node* newNode) {
-    childs.emplace_back();
-    childs[childs.size() - 1] = std::move(newNode);
+    // Construye un nuevo nodo al final del vector
+    childs.emplace_back(newNode);
     return static_cast<uint32_t>(childs.size());
 }
 
-// Elimina del array de hijos el hijo pasado como parametro al nodo actual
-// y devuelve la posicion donde estaba y -1 si no ha borrado
+// Elimina del array de hijos el hijo pasado como parametro
+// y devuelve la posicion donde estaba o -1 si no ha borrado
 uint32_t Node::removeChild(Node* remNode) {
-    // Comprueba por cada hijo si el puntero a entidad es igual
+    // Comprueba por cada hijo si es igual al recibido por parámetro
     for (uint32_t i{}; i <= childs.size(); i++) {
         if (childs[i]->getEntity() == remNode->getEntity()) {
+            // Si lo es, lo borra y devuelve donde estaba
             childs.erase(childs.begin() + i);
             return i;
         }
@@ -38,6 +39,7 @@ void Node::translate(glm::vec3 toTranslate) {
 
 // Actualiza la matriz de transformacion con la funcion rotate de GLM y marca que lo ha actualizado
 void Node::rotate(glm::vec4 toRotate) {
+    // Aquí aprovecho el cuarto elemento del vector para el ángulo, pero si quieres puede separarlo
     transMatrix = glm::rotate(transMatrix, glm::radians(toRotate.w), glm::vec3{ toRotate.x, toRotate.y, toRotate.z });
     updated = true;
 }

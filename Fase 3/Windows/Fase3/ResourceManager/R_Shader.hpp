@@ -12,10 +12,14 @@ struct R_Shader: virtual public R_Resource{
     }
     
     // Cargamos igual que en el constructor, con ayuda del constructor de la clase Shader
-    void load(const std::string& path, [[maybe_unused]] RType rt){
+    void load(const std::string& path, RType rt){
         shader = Shader(path.c_str(), path.c_str());
+        // Siempre será RShader pero es sano y escalable mantenerlo
+        type = rt;
     };
     
     // El shader recuperado, almacenado aqui
     Shader shader{};
+    // Tipo del recurso
+    RType type{};
 };
