@@ -13,7 +13,7 @@ struct R_Resource{
     // Setea la escena
     void setScene(Node* node){scene = node;};
     // Metodo de carga generico, los parametros tendran mas o menos valor segun el recurso
-    virtual void load(const std::string& name, [[maybe_unused]] RType rt) = 0;
+    virtual void load(const std::string& name, RType rt) = 0;
     
     // Nombre del recurso, importante para no repetir recursos
     std::string name{};

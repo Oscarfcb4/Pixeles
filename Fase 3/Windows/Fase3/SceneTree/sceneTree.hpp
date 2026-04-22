@@ -8,7 +8,7 @@
 struct Node{
     // Metodo para la gestion de los hijos 
     uint32_t addChild(Node* newNode);
-    uint32_t removeChild(Node* remNode);
+    bool removeChild(Node* remNode);
     std::vector<Node*>& getChildren(){return childs;};
     Node* getDad(){return dad;};
 
@@ -20,11 +20,11 @@ struct Node{
     void translate(glm::vec3 translate);
     void rotate(glm::vec4 rotation);
     void scale(glm::vec3 scaleM);
-    void setTransMatrix(glm::mat4 transMatrix_){transMatrix = transMatrix_;};
+    void setTransMatrix(glm::mat4 transMatrix){this->transMatrix = transMatrix;};
     glm::mat4 getTransMatrix(){return transMatrix;};
 
     // Metodo que recorre el arbol y dibuja todos sus hijos teniendo en cuenta una camara, normalmente de uso exlusivo de la raiz
-    void traversal(glm::mat4 cumulativeMatrix, E_Camera* principalCamera);
+    void traversal(glm::mat4 parentMatrix, E_Camera* principalCamera);
 
     // Metodo para recuperar y asignar una camara principal, de nuevo solo util en la raiz
     void setPrincipalCamera(E_Camera* newPCamera){principalCamera = newPCamera;};
@@ -38,6 +38,4 @@ struct Node{
         E_Camera* principalCamera{};
         // Su transformación local (empieza por la identidad)
         glm::mat4 transMatrix{1.0f};
-        // Solo hace el calculo de la matriz acumulada si este nodo ha sido cambiado
-        bool updated{true};
 };

@@ -8,17 +8,16 @@ uint32_t Node::addChild(Node* newNode) {
 }
 
 // Elimina del array de hijos el hijo pasado como parametro
-// y devuelve la posicion donde estaba o -1 si no ha borrado
-uint32_t Node::removeChild(Node* remNode) {
-    // Comprueba por cada hijo si es igual al recibido por parámetro
-    for (uint32_t i{}; i <= childs.size(); i++) {
-        if (childs[i]->getEntity() == remNode->getEntity()) {
-            // Si lo es, lo borra y devuelve donde estaba
-            childs.erase(childs.begin() + i);
-            return i;
-        }
+// y devuelve si lo ha borrado
+bool Node::removeChild(Node* remNode) {
+    // Itera para comprobar si el nodo es igual al recibido por parámetro
+    auto it = std::find(childs.begin(), childs.end(), remNode);
+    if (it != childs.end()) {
+        // Si lo es, lo borra y devuelve donde estaba
+        childs.erase(it);
+        return true;
     }
-    return -1;
+    return false;
 }
 
 // Asigna una entidad y devuelve true o false si lo ha hecho o no
@@ -34,34 +33,29 @@ bool Node::setEntity(E_Entity* newEntity) {
 // Actualiza la matriz de transformacion con la funcion translate de GLM y marca que lo ha actualizado
 void Node::translate(glm::vec3 toTranslate) {
     transMatrix = glm::translate(transMatrix, glm::vec3(toTranslate.x, toTranslate.y, toTranslate.z));
-    updated = true;
 }
 
 // Actualiza la matriz de transformacion con la funcion rotate de GLM y marca que lo ha actualizado
 void Node::rotate(glm::vec4 toRotate) {
     // Aquí aprovecho el cuarto elemento del vector para el ángulo, pero si quieres puede separarlo
     transMatrix = glm::rotate(transMatrix, glm::radians(toRotate.w), glm::vec3{ toRotate.x, toRotate.y, toRotate.z });
-    updated = true;
 }
 
 // Actualiza la matriz de transformacion con la funcion scale de GLM y marca que lo ha actualizado
 void Node::scale(glm::vec3 toScale) {
     transMatrix = glm::scale(transMatrix, glm::vec3(toScale.x, toScale.y, toScale.z));
-    updated = true;
 }
 
 // Recorrido del arbol
-void Node::traversal(glm::mat4 cumulativeMatrix, E_Camera* prCamera) {
-    // Si se ha actualizado, le pasa la matriz acumulada y recalcula la matriz de transformacion
-    if (updated) {
-        transMatrix = cumulativeMatrix * transMatrix;
-        updated = false;
-    }
+void Node::traversal(glm::mat4 parentMatrix, E_Camera* prCamera) {
+    // Le pasa la matriz del padre y recalcula la matriz de transformación, volviéndose la acumulada
+    glm::mat4 cumulativeMatrix = parentMatrix * transMatrix;
+
     // Si tiene entidad y esta entidad tiene un puntero a un ResourceManager que existe, 
     // le manda a dibujar. Esto se hace para evitar dibujar las camaras aqui.
     if (entity && entity->RM)
-        entity->draw(transMatrix, prCamera);
+        entity->draw(cumulativeMatrix, prCamera);
     // Recursivamente llamamos a los hijos
     for (auto& c : childs)
-        c->traversal(transMatrix, prCamera);
+        c->traversal(cumulativeMatrix, prCamera);
 }

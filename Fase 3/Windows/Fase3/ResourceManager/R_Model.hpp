@@ -40,16 +40,16 @@ struct R_Model: virtual public R_Resource{
 			// La forma mas optima de hacerlo es metiendole yo los datos a mano, el cubo basico no tiene textura
 
 			// Cara delantera (z = 0.5)
-			vertices.push_back(Vertex{glm::vec3(-1.0f, 1.0f, 1.0f)}); // Vértice 0 (Esquina superior izquierda)
-			vertices.push_back(Vertex{glm::vec3( 1.0f, 1.0f, 1.0f)}); // Vértice 1 (Esquina superior derecha)
-			vertices.push_back(Vertex{glm::vec3(-1.0f,-1.0f, 1.0f)}); // Vértice 2 (Esquina inferior izquierda)
-			vertices.push_back(Vertex{glm::vec3( 1.0f,-1.0f, 1.0f)}); // Vértice 3 (Esquina inferior derecha)
+			vertices.push_back(Vertex{glm::vec3(-0.5f, 0.5f, 0.5f)}); // Vértice 0 (Esquina superior izquierda)
+			vertices.push_back(Vertex{glm::vec3( 0.5f, 0.5f, 0.5f)}); // Vértice 1 (Esquina superior derecha)
+			vertices.push_back(Vertex{glm::vec3(-0.5f,-0.5f, 0.5f)}); // Vértice 2 (Esquina inferior izquierda)
+			vertices.push_back(Vertex{glm::vec3( 0.5f,-0.5f, 0.5f)}); // Vértice 3 (Esquina inferior derecha)
 
 			// Cara trasera (Eje Z = -0.5)
-			vertices.push_back(Vertex{glm::vec3(-1.0f, 1.0f,-1.0f)}); // Vértice 4 
-			vertices.push_back(Vertex{glm::vec3( 1.0f, 1.0f,-1.0f)}); // Vértice 5 
-			vertices.push_back(Vertex{glm::vec3(-1.0f,-1.0f,-1.0f)}); // Vértice 6 
-			vertices.push_back(Vertex{glm::vec3( 1.0f,-1.0f,-1.0f)}); // Vértice 7 
+			vertices.push_back(Vertex{glm::vec3(-0.5f, 0.5f,-0.5f)}); // Vértice 4 
+			vertices.push_back(Vertex{glm::vec3( 0.5f, 0.5f,-0.5f)}); // Vértice 5 
+			vertices.push_back(Vertex{glm::vec3(-0.5f,-0.5f,-0.5f)}); // Vértice 6 
+			vertices.push_back(Vertex{glm::vec3( 0.5f,-0.5f,-0.5f)}); // Vértice 7 
 
 			// Cara delantera
 			indices.push_back(3);

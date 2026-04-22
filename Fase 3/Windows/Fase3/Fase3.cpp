@@ -15,31 +15,39 @@ float aspect{ static_cast<float>(ANCHO) / static_cast<float>(ALTO) };
 float lastFrame{};
 float deltaTime{};
 
-// Vectores para almacenar los nodos, camaras y modelos
+// Vectores para almacenar los punteros a los nodos, camaras y modelos
 std::vector<std::unique_ptr<Node>> nodes{};
 std::vector<std::unique_ptr<E_Camera>> cameras{};
 std::vector<std::unique_ptr<E_Model>> models{};
 
 // Los métodos para crear cubos y para crear cámaras
 Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm::vec3 rotAxis) {
+	// Creamos el nodo
 	auto nodeCube = std::make_unique<Node>();
+	// Lo metemos en el vector de nodos
 	nodes.push_back(std::move(nodeCube));
+	// Lo recuperamos como referencia
 	auto& nCube = nodes[nodes.size() - 1];
-	// Como siempre va a ser igual le pasamos ya las cosas por el constructor
+	// Creamos la entidad, esta vez usando nuestro resource manager como implementamos en su momento
 	auto entityModel = std::make_unique<E_Model>(&RM, "Cubo", RType::RCube);
+	// Lo metemos en el vector de modelos
 	models.push_back(std::move(entityModel));
+	// Lo recuperamos como referencia
 	auto& eCube = models[models.size() - 1];
-	// El cubo siempre va a tener solo un shader, el base
+	// Le metemos nuestro shader, con el mismo nombre que le pusimos
 	eCube->setShader("base");
-	// Aplicamos transformaciones
+	// Aplicamos transformaciones para colocarlo como lo quiere el usuario
 	nCube->translate(glm::vec3(pos.x, pos.y, pos.z));
 	nCube->rotate(glm::vec4(rotAxis.x, rotAxis.y, rotAxis.z, rotAngle));
-	nCube->scale(glm::vec3(size.x / 2, size.y / 2, size.z / 2));
-	// Le ponemos el color
+	nCube->scale(glm::vec3(size.x, size.y, size.z));
+	// Le ponemos el color y el aspect ratio
 	eCube->color = color;
 	eCube->setAspect(aspect);
+	// Guardamos la entidad dentro del nodo
 	nCube->setEntity(std::move(eCube.get()));
+	// Lo añadimos a la escena
 	sceneRoot->addChild(std::move(nCube.get()));
+	// Recuperamos el nodo para el usuario
 	return sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1];
 }
 
@@ -50,21 +58,21 @@ Node* createCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) {
 	nodes.push_back(std::move(nodeCam));
 	// Lo recuperamos como una referencia para trabajar con el
 	auto& nCam = nodes[nodes.size() - 1];
-	// Creamos la entidad 
+	// Creamos la entidad con los parámetros
 	auto entityCam = std::make_unique<E_Camera>(position, up, yaw, pitch);
 	// Lo pusheamos y le pasamos la responsabilidad de memoria
 	cameras.push_back(std::move(entityCam));
 	// La recuperamos como referencia
 	auto& eCam = cameras[cameras.size() - 1];
-	// Si no existe una camara, la asigna como camara principal
+	// Si no existe ya una, la asigna como camara principal
 	if(sceneRoot->getPrincipalCamera() == NULL){
 		sceneRoot->setPrincipalCamera(eCam.get());
 	}
 	// Le asigna al nodo la entidad
 	nCam->setEntity(eCam.get());
-	// Le anadimos a la raiz como hijo
+	// Lo anadimos a la raiz como hijo, para que forme parte de la escena
 	sceneRoot->addChild(nCam.get());
-	// Devuelve un puntero al nodo
+	// Devuelve un puntero al nodo, para que el usuario pueda jugar con él
 	return sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1];
 }
 
@@ -85,23 +93,25 @@ void cleanBackground(Color c) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-// La velocidad de la cámara, 
-float speed{ 1.0f };
-
+// Procesamos los inputs del teclado de los usuarios con GLFW
 void processInput() {
+	// El movimiento de la cámara con WASD, usando los enumerados de GLFW y glfwGetKey
 	if(glfwGetKey(window, GLFW_KEY_W)) {
-		cameras.at(0)->processKeyboard(FORWARD, speed);
+		// Recuperamos la cámara de nuestro vector y usamos nuestro método de movimiento
+		cameras.at(0)->processKeyboard(FORWARD, deltaTime);
 	}
 	if(glfwGetKey(window, GLFW_KEY_S)) {
-		cameras.at(0)->processKeyboard(BACKWARD, speed);
+		cameras.at(0)->processKeyboard(BACKWARD, deltaTime);
 	}
 	if(glfwGetKey(window, GLFW_KEY_A)) {
-		cameras.at(0)->processKeyboard(LEFT, speed);
+		cameras.at(0)->processKeyboard(LEFT, deltaTime);
 	}
 	if(glfwGetKey(window, GLFW_KEY_D)) {
-		cameras.at(0)->processKeyboard(RIGHT, speed);
+		cameras.at(0)->processKeyboard(RIGHT, deltaTime);
 	}
+	// Escape para cerrar la ventana.
 	if(glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+		// Con esto, saldrá del bucle de renderizado
 		glfwSetWindowShouldClose(window, true);
 	}
 }
@@ -111,26 +121,41 @@ float lastX{}, lastY{};
 // Si es la primera lectura del ratón
 bool firstMouse{ true };
 
-void mouse_callback([[maybe_unused]] GLFWwindow* window, double xPosIn, double yPosIn) {
+// Procesamos los inputs del movimiento del ratón
+void movimientoRaton(GLFWwindow* window, double xPosIn, double yPosIn) {
+	// Guardamos la posición que nos pasa GLFW
 	float xPos{ static_cast<float>(xPosIn) };
 	float yPos{ static_cast<float>(yPosIn) };
 
+	// Si es la primera vez que leemos el ratón, la guardamos antes de actualizarlas
 	if (firstMouse) {
 		lastX = xPos;
 		lastY = yPos;
 		firstMouse = false;
 	}
 
-	// Calculamos la diferencia entre la posicion actual y la anterior
-	float xOffset{ xPos - lastX }, yOffset{ lastY - yPos };
+	// Calculamos la diferencia entre la posicion actual y la anterior en ambos ejes
+	float xOffset{ xPos - lastX };
+	float yOffset{ lastY - yPos };
 	// Actualizamos
 	lastX = xPos;
 	lastY = yPos;
 
+	// Recuperamos la cámara principal, en el caso de que haya
 	if (cameras.at(0) != NULL)
+		// Con la diferencia entre posiciones, llamamos a nuestro método de movimiento del ratón
 		cameras.at(0)->processMouseMovement(xOffset, yOffset);
 }
 
+// Procesamos el input de la rueda del ratón, necesita X e Y por compatibilidad con dispositivos raros
+void zoomRaton(GLFWwindow* window, double xOffset, double yOffset) {
+	// Si tiene cámara principal, la usamos
+	if (cameras.at(0) != NULL)
+		// A nosotros obviamente sólo nos interesa el movimiento vertical
+		cameras.at(0)->processMouseScroll(static_cast<float>(yOffset));
+}
+
+// Método donde encapsulas la responsabilidad del setup de OpenGL
 bool configurarOpenGL() {
 	glfwInit();
 
@@ -152,7 +177,8 @@ bool configurarOpenGL() {
 		return false;
 	}
 
-	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetCursorPosCallback(window, movimientoRaton);
+	glfwSetScrollCallback(window, zoomRaton);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glViewport(0, 0, ANCHO, ALTO);
@@ -160,12 +186,11 @@ bool configurarOpenGL() {
 }
 
 int main() {
-	
 	// Llamamos a nuestra función que configura OpenGL
 	if (!configurarOpenGL())
 		return -1;
 
-	// Iniciamos al raiz del arbol de la escena
+	// Iniciamos la raiz del arbol de la escena
 	sceneRoot = std::make_unique<Node>();
 	// Le decimos a nuestro Resource Manager que esta es nuestra raíz
 	RM.setScene(sceneRoot.get());
