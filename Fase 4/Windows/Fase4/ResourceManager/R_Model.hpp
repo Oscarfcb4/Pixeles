@@ -1,5 +1,6 @@
 #pragma once
 #include "R_Mesh.hpp"
+#include <iostream>
 
 // Clase modelo, generica.
 
@@ -35,7 +36,9 @@ struct R_Model: virtual public R_Resource{
 	float getMixValue() { return mixValue; };
 
 	// Anade una textura a todas las mallas del modelo
-	void addTexture(const std::string& path, const std::string& type = "texture_diffuse");
+	void addTexture(const std::string& path, const std::string& type, std::vector<Texture>& texturesLoaded);
+
+	private:
 
 	private:
 		// Procesa el cubo

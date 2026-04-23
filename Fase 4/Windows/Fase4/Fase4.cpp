@@ -25,18 +25,24 @@ std::vector<std::unique_ptr<E_Light>> lights{};
 glm::vec3 numLights{};
 
 // Los métodos para crear cubos y para crear cámaras
-int cuboCounter{};
-Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm::vec3 rotAxis) {
+Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm::vec3 rotAxis, bool texture) {
 	// Creamos el nodo
 	auto nodeCube = std::make_unique<Node>();
 	// Lo metemos en el vector de nodos
 	nodes.push_back(std::move(nodeCube));
 	// Lo recuperamos como referencia
 	auto& nCube = nodes[nodes.size() - 1];
-	// Creamos la entidad con un nombre unico para evitar compartir texturas entre cubos
-	auto entityModel = std::make_unique<E_Model>(&RM, "Cubo_" + std::to_string(cuboCounter++), RType::RCube);
-	// Lo metemos en el vector de modelos
-	models.push_back(std::move(entityModel));
+	if (texture) {
+		// Creamos la entidad con un nombre unico para evitar compartir texturas entre cubos
+		auto entityModel = std::make_unique<E_Model>(&RM, "Cubo_" + models.size(), RType::RCube);
+		// Lo metemos en el vector de modelos
+		models.push_back(std::move(entityModel));
+	} else {
+		// Creamos la entidad con un nombre compartido para evitar recargar el modelo
+		auto entityModel = std::make_unique<E_Model>(&RM, "Cubo", RType::RCube);
+		// Lo metemos en el vector de modelos
+		models.push_back(std::move(entityModel));
+	}
 	// Lo recuperamos como referencia
 	auto& eCube = models[models.size() - 1];
 	// Le metemos nuestro shader, con el mismo nombre que le pusimos
@@ -49,7 +55,7 @@ Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm
 	eCube->color = color;
 	eCube->setAspect(aspect);
 	// Guardamos la entidad dentro del nodo
-	nCube->setEntity(std::move(eCube.get()));
+	nCube->setEntity(eCube.get());
 	// Lo añadimos a la escena
 	sceneRoot->addChild(std::move(nCube.get()));
 	// Recuperamos el nodo para el usuario
@@ -289,16 +295,16 @@ int main() {
 
 	// Creamos los cubos, igual que en la Fase2
 	std::vector<Node*> cubos{};
-	Node* cubo1  = createCube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo2  = createCube(glm::vec3(2.0f, 5.0f, -15.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo3  = createCube(glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo4  = createCube(glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo5  = createCube(glm::vec3(2.4f, -0.4f, -3.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo6  = createCube(glm::vec3(-1.7f, 3.0f, -7.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo7  = createCube(glm::vec3(1.3f, -2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 1.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo8  = createCube(glm::vec3(1.5f, 2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo9  = createCube(glm::vec3(1.5f, 0.2f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.5f, 0.5f, 0.5f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	Node* cubo10 = createCube(glm::vec3(-1.3f, 1.0f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.5f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	Node* cubo1  = createCube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f), true);
+	Node* cubo2  = createCube(glm::vec3(2.0f, 5.0f, -15.0f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo3  = createCube(glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo4  = createCube(glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 0.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo5  = createCube(glm::vec3(2.4f, -0.4f, -3.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo6  = createCube(glm::vec3(-1.7f, 3.0f, -7.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 1.0f, 1.0f),  45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo7  = createCube(glm::vec3(1.3f, -2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 1.0f, 1.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo8  = createCube(glm::vec3(1.5f, 2.0f, -2.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 0.0f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo9  = createCube(glm::vec3(1.5f, 0.2f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(0.5f, 0.5f, 0.5f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
+	Node* cubo10 = createCube(glm::vec3(-1.3f, 1.0f, -1.5f), glm::vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.5f, 0.0f, 1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f), false);
 	
 	// Nos guardamos los cubos para iterar luego
 	cubos.push_back(cubo1);
@@ -331,14 +337,14 @@ int main() {
 			// Lo mismo que la fase2, pero usando los nodos de nuestro árbol
 			Node* cubo = cubos.at(i);
 			float frameAngle{};
-			float rotationSpeed{2000.0f};
+			float rotationSpeed{40.0f};
 			if (i > 0) {
 				frameAngle = deltaTime * rotationSpeed * static_cast<float>(i);
 			}
 			else {
 				frameAngle = deltaTime * rotationSpeed;
 			}
-			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, glm::radians(frameAngle)));
+			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, frameAngle));
 		}
 
 		auto* sp = dynamic_cast<E_Light*>(spotLight->getEntity());

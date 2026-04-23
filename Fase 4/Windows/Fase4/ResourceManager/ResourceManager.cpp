@@ -10,49 +10,51 @@
 #include <stb_image.h>
 
 // Implementacion de addTexture para R_Model
-void R_Model::addTexture(const std::string& path, const std::string& type) {
-	// Generamos la nueva textura
+void R_Model::addTexture(const std::string& path, const std::string& type, std::vector<Texture>& texturesLoaded) {
+	// Comprobamos si la textura ya esta cargada
+	for (auto& t : texturesLoaded) {
+		if (t.path == path) {
+			for (auto& mesh : meshes) {
+				mesh.textures.push_back(t);
+			}
+			mixValue = 0.0f;
+			return;
+		}
+	}
+
+	// No existe, la cargamos
 	unsigned int textureID{};
 	glGenTextures(1, &textureID);
-	// Cargamos con stbi la informacion de la imagen
 	int width{}, height{}, nrComponents{};
 	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
-	// Si ha recuperado datos, lo cargamos en la textura
 	if (data) {
-		// Creamos un formato base, segun el numero de canales de color le ponemos uno u otro
 		GLenum format{};
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-		// Anidamos la textura
+		if (nrComponents == 1) format = GL_RED;
+		else if (nrComponents == 3) format = GL_RGB;
+		else if (nrComponents == 4) format = GL_RGBA;
+
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		// Cargamos la imagen
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		// Parametros para mimaps y texturas
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Generamos los mipmaps
 		glGenerateMipmap(GL_TEXTURE_2D);
-		// Liberamos los datos
 		stbi_image_free(data);
 	}
 	else {
 		std::cout << "Texture failed to load: " << path << std::endl;
 	}
-	// Creamos la estructura de textura y la anadimos a todas las mallas
+
 	Texture texture{};
 	texture.id = textureID;
 	texture.type = type;
 	texture.path = path;
+	texturesLoaded.push_back(texture);
+
 	for (auto& mesh : meshes) {
 		mesh.textures.push_back(texture);
 	}
-	// El color ya no cuenta, la textura es la que importa
 	mixValue = 0.0f;
 }
 

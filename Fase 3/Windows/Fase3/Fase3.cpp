@@ -44,7 +44,7 @@ Node* createCube(glm::vec3 pos, glm::vec3 size, Color color, float rotAngle, glm
 	eCube->color = color;
 	eCube->setAspect(aspect);
 	// Guardamos la entidad dentro del nodo
-	nCube->setEntity(std::move(eCube.get()));
+	nCube->setEntity(eCube.get());
 	// Lo añadimos a la escena
 	sceneRoot->addChild(std::move(nCube.get()));
 	// Recuperamos el nodo para el usuario
@@ -241,14 +241,14 @@ int main() {
 			// Lo mismo que la fase2, pero usando los nodos de nuestro árbol
 			Node* cubo = cubos.at(i);
 			float frameAngle{};
-			float rotationSpeed{2000.0f};
+			float rotationSpeed{40.0f};
 			if (i > 0) {
 				frameAngle = deltaTime * rotationSpeed * static_cast<float>(i);
 			}
 			else {
 				frameAngle = deltaTime * rotationSpeed;
 			}
-			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, glm::radians(frameAngle)));
+			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, frameAngle));
 		}
 
 		// Recorremos el arbol
