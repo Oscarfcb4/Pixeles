@@ -1,0 +1,3 @@
+﻿  Fase4.cpp
+C:\TFG\GIT\Pixeles\Fase 4\Windows\Fase4\Fase4.cpp(261,1): warning C4715: 'configurarOpenGL': no todas las rutas de acceso de control devuelven un valor
+  Fase4.vcxproj -> C:\TFG\GIT\Pixeles\Fase 4\Windows\x64\Debug\Fase4.exe

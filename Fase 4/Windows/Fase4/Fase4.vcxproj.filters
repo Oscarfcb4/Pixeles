@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Fase4.cpp" />
+    <ClCompile Include="Librerias\GLAD\src\glad.c" />
+    <ClCompile Include="SceneTree\SceneTree.cpp">
+      <Filter>SceneTree</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager\ResourceManager.cpp">
+      <Filter>ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\Shader.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Fase4.hpp" />
+    <ClInclude Include="SceneTree\E_AllEntities.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTree\E_Entity.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTree\E_Camera.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTree\E_Model.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTree\SceneTree.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager\R_AllResources.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager\R_Mesh.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager\R_Model.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager\R_Resource.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager\R_Shader.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager\ResourceManager.hpp">
+      <Filter>ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Shader.hpp">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTree\E_Light.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="SceneTree">
+      <UniqueIdentifier>{09fdf93b-16af-4447-85b5-d6a821a55507}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ResourceManager">
+      <UniqueIdentifier>{d97cdec5-61aa-4530-9202-861dda4a927b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6ce9fd23-6e96-4cae-ac55-0fa269b1efe5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\FragmentShader.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\VertexShader.vs">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
