@@ -6,6 +6,10 @@
 #include <gtc/type_ptr.hpp>
 #include <iostream>
 #include <string>
+#include <vector>
+#include <memory>
+#include <algorithm>
+#include <cstdint>
 #include <Shader.hpp>
 
 constexpr unsigned int ANCHO{ 1280 };
