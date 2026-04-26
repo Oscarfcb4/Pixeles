@@ -83,7 +83,7 @@ struct R_Model: virtual public R_Resource{
 			vertices.push_back(Vertex{ glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec2(1.0f, 0.0f) });
 			vertices.push_back(Vertex{ glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec2(0.0f, 0.0f) });
 
-			// Indices para cada cara (2 triangulos por cara)
+			// Indices para cada cara (2 triangulos por cara, 6 caras en total)
 			for (int i = 0; i < 6; i++) {
 				int base = i * 4;
 				indices.push_back(base + 0); indices.push_back(base + 1); indices.push_back(base + 2);
@@ -101,5 +101,5 @@ struct R_Model: virtual public R_Resource{
 		Shader* shader{};
 		// Correccion del valor gamma y el valor de mezcla
 		bool gammaCorrection{};
-		float mixValue{ 0.99f };
+		float mixValue{ 1.0f };
 };

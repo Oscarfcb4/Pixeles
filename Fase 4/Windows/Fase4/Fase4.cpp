@@ -21,7 +21,10 @@ float deltaTime{};
 std::vector<std::unique_ptr<Node>> nodes{};
 std::vector<std::unique_ptr<E_Camera>> cameras{};
 std::vector<std::unique_ptr<E_Model>> models{};
+// Vector para guardar las luces
 std::vector<std::unique_ptr<E_Light>> lights{};
+// Aprovechamos un vector 3 para saber cuántas luces hay de cada tipo
+// (X direcionales, Y puntuales y Z focales)
 glm::vec3 numLights{};
 
 // Los métodos para crear cubos y para crear cámaras
@@ -88,41 +91,35 @@ Node* createCamera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) {
 }
 
 // Los métodos para crear las luces
-Node* createDirectionalLight(glm::vec3 dir, glm::vec3 amb, glm::vec3 dif, glm::vec3 spc, std::string shader = "base") {
+Node* createDirectionalLight(glm::vec3 dir, glm::vec3 amb, glm::vec3 dif, glm::vec3 spc, std::string shader) {
 	auto nodeLight = std::make_unique<Node>();
 	nodes.push_back(std::move(nodeLight));
 	auto& nLight = nodes[nodes.size() - 1];
 	auto entityLight = std::make_unique<E_Light>();
 	lights.push_back(std::move(entityLight));
 	auto& eLight = lights[lights.size() - 1];
-	// Si no le pasas un shader, usa el base. Si no, busca el que le has pasado en el gestor de recursos
-	if (strcmp(shader.c_str(), "base") != 0)
-		eLight->shader = &RM.getShader(shader, shader, shader)->shader;
-	else
-		eLight->shader = basicShader;
+	// Como ya estará cargado en memoria el gestor de recurso nos devolverá su ID de OpenGL
+	eLight->shader = &RM.getShader(shader, shader, shader)->shader;
 	// Crea una luz direccional en la entidad luz con los parametros
 	eLight->setDirectionalLight(dir, amb, dif, spc);
-	// Marcamos la id como el numero actual de luces direccionales (la id empieza en 0, nuestro contador no)
+	// Marcamos la id como el numero actual de luces direccionales
 	eLight->id = static_cast<int>(numLights.x);
 	nLight->setEntity(std::move(eLight.get()));
 	sceneRoot->addChild(std::move(nLight.get()));
-	// Aumenta el numero de luces direccionales en 1
+	// Aumenta el contador de luces direccionales 
 	numLights.x += 1;
 	return sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1];
 }
 
 Node* createPointLight(glm::vec3 pos, glm::vec3 amb, glm::vec3 dif, 
-  glm::vec3 spc, glm::vec3 att, std::string shader = "base") {
+  glm::vec3 spc, glm::vec3 att, std::string shader) {
 	auto nodeLight = std::make_unique<Node>();
 	nodes.push_back(std::move(nodeLight));
 	auto& nLight = nodes[nodes.size() - 1];
 	auto entityLight = std::make_unique<E_Light>();
 	lights.push_back(std::move(entityLight));
 	auto& eLight = lights[lights.size() - 1];
-	if (shader != "base")
-		eLight->shader = &RM.getShader(shader, shader, shader)->shader;
-	else
-		eLight->shader = basicShader;
+	eLight->shader = basicShader;
 	// Crea una luz puntual en la entidad luz con los parametros
 	eLight->setPointLight(pos, amb, dif, spc, att);
 	// Esta vez usamos el numero de luces puntuales
@@ -135,17 +132,14 @@ Node* createPointLight(glm::vec3 pos, glm::vec3 amb, glm::vec3 dif,
 }
 
 Node* createSpotLight(glm::vec3 pos, glm::vec3 dir, glm::vec3 amb, glm::vec3 dif, glm::vec3 spc, 
-  glm::vec3 att, glm::vec2 cut, std::string shader = "base") {
+  glm::vec3 att, glm::vec2 cut, std::string shader) {
 	auto nodeLight = std::make_unique<Node>();
 	nodes.push_back(std::move(nodeLight));
 	auto& nLight = nodes[nodes.size() - 1];
 	auto entityLight = std::make_unique<E_Light>();
 	lights.push_back(std::move(entityLight));
 	auto& eLight = lights[lights.size() - 1];
-	if (shader != "base")
-		eLight->shader = &RM.getShader(shader, shader, shader)->shader;
-	else
-		eLight->shader = basicShader;
+	eLight->shader = basicShader;
 	// Crea una luz focal en la entidad luz con los parametros
 	eLight->setSpotLight(pos, dir, amb, dif, spc, att, cut);
 	// Esta vez aumentamos el numero de luces focales
@@ -284,14 +278,14 @@ int main() {
 	// Creamos las luces
 	createDirectionalLight(
 		glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f, 0.1f, 0.1f),
-		glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.2f, 0.2f, 0.2f));
+		glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "base");
 	createPointLight(
 		glm::vec3(-3.8f, 0.0f, -12.3f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.8f, 0.8f, 0.8f),
-		glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.09f, 0.032f));
+		glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.09f, 0.032f), "base");
 	auto* spotLight = createSpotLight(
 		cameras.at(0)->position, cameras.at(0)->front,
 		glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f),
-		glm::vec3(1.0f, 0.09f, 0.032f), glm::vec2(glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(15.0f))));
+		glm::vec3(1.0f, 0.09f, 0.032f), glm::vec2(glm::cos(glm::radians(12.5f)), glm::cos(glm::radians(15.0f))), "base");
 
 	// Creamos los cubos, igual que en la Fase2
 	std::vector<Node*> cubos{};
@@ -318,6 +312,7 @@ int main() {
 	cubos.push_back(cubo9);
 	cubos.push_back(cubo10);
 
+	// Cargamos la textura para el cubo rojo, el primero
 	dynamic_cast<E_Model*>(cubo1->getEntity())->setTexture("./Resources/Caja.png");
 
 	// Inicializamos el bucle de renderizado
@@ -347,8 +342,10 @@ int main() {
 			cubo->rotate(glm::vec4(1.0f, 0.3f, 0.5f, frameAngle));
 		}
 
+		// Casteamos la entidad genérica a entidad luz
 		auto* sp = dynamic_cast<E_Light*>(spotLight->getEntity());
 
+		// Actualizamos la posición y dirección de la luz con la de la cámara
 		sp->position = cameras.at(0)->position;
 		sp->direction = cameras.at(0)->front;
 

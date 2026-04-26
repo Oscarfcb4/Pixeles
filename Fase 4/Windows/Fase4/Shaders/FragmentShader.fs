@@ -8,13 +8,15 @@ in vec3 FragPos;
 
 // Objeto material, con todo lo necesario para calcular el color de los materiales
 struct Material{
+	// Textura del color
 	sampler2D diffuse;
+	// Textura de los brillos
 	sampler2D specular;
 	float shininess;
 	vec3 color;
 };
 
-// Objeto luz global
+// Objeto luz direccional
 struct DirectionalLight{
 	vec3 direction;
 	vec3 ambient;
@@ -48,8 +50,8 @@ struct SpotLight{
 };
 
 // Valor de mezcla entre el color base que le pasa el usuario y el del material, cuanto menor sea el valor mayor sera
-// el color del material y cuanto mayor el del color. Si no tiene material, de base se pone en 0,99, si si tiene se pone a 0.
-uniform float mix_value;
+// el color del material y cuanto mayor el del color. Si no tiene material, de base se pone en 1.0, si si tiene se pone a 0.
+uniform float mixValue;
 
 uniform vec3 cameraPos;
 uniform Material material;
@@ -70,33 +72,34 @@ uniform PointLight pLight[n_Max_pointLights];
 uniform SpotLight sLight[n_Max_spotLights];
 
 // Calculamos el efecto de las luces direccionales en el color del fragmento
-vec3 calculateDirectionalLight(DirectionalLight dLight, vec3 Normal, vec3 cameraPos){
-	// Sacamos y normalizamos la direccion con la que el rayo de luz colisiona con el fragmento desde la colision hacia fuera
+vec3 calculateDirectionalLight(DirectionalLight dLight, vec3 Normal, vec3 viewDir){
+	// Sacamos y normalizamos la direccion con la que el rayo de luz colisiona con el fragmento, al revés
 	vec3 lightDir = normalize(-dLight.direction);
-	// Sacamos la luz difusa entre 0 y el angulo entre la normal entre y la direccion de la luz
+	// Sacamos la intensidad entre 0 y el angulo entre la normal y la direccion de la luz
 	float diffuseIntensity = max(dot(Normal, lightDir), 0.0);
-	// Sacamos la luz especular sacando la direccion del reflejo de la direccion y la normal
+	// Sacamos la dirección del reflejo con la inversa de la luz de la dirección y la normal
 	vec3 reflectDir = reflect(-lightDir, Normal);
-	// Ahora calculamos la intensidad de esta luz segun el angulo que hacen respecto a la camara y el brillo del material
-	float specularIntensity = pow(max(dot(cameraPos, reflectDir), 0.0), material.shininess);
+	// Ahora calculamos la intensidad de esta luz segun el angulo que hacen respecto a la camara y 
+	// el brillo del material
+	float specularIntensity = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
 	// Con la difusa y la especular calculadas, y sabiendo que el valor de la ambiental es siempre igual que la difusa en este sistema,
 	// aplicamos las intensidades a los valores de las luces y sus texturas, las cuales las mezclamos con el color del modelo.
-	vec3 ambient = dLight.ambient * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mix_value);
-	vec3 diffuse = dLight.diffuse * diffuseIntensity * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mix_value);
-	vec3 specular = dLight.specular * specularIntensity * mix(vec3(texture(material.specular, TexCoord)), material.color, mix_value);
+	vec3 ambient = dLight.ambient * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mixValue);
+	vec3 diffuse = dLight.diffuse * diffuseIntensity * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mixValue);
+	vec3 specular = dLight.specular * specularIntensity * mix(vec3(texture(material.specular, TexCoord)), material.color, mixValue);
 	// Devolvemos el resultado
 	return (ambient + diffuse + specular);
 }
 
-vec3 calculatePointLight(PointLight pLight, vec3 Normal, vec3 FragPos, vec3 cameraPos){
+vec3 calculatePointLight(PointLight pLight, vec3 Normal, vec3 FragPos, vec3 viewDir){
 	// Para la puntual necesitamos saber la direccion pero respecto al fragmento especifico
 	vec3 lightDir = normalize(pLight.position - FragPos);
 	// Difusa
 	float diffuseIntensity = max(dot(Normal, lightDir), 0.0);
 	// Especular
 	vec3 reflectDir = reflect(-lightDir, Normal);
-	float specularIntensity = pow(max(dot(cameraPos, reflectDir), 0.0), material.shininess);
+	float specularIntensity = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 	// Ahora calculamos la atenuacion, primero sacando la distancia entre la posicion y el fragmento
 	float distance = length(pLight.position - FragPos);
 	// Ahora aplicamos la formula de la atenuacion
@@ -108,10 +111,10 @@ vec3 calculatePointLight(PointLight pLight, vec3 Normal, vec3 FragPos, vec3 came
 	// Siendo constante, lineal y cuadratico valores dependientes del usuario.
 	float attenuation = 1.0 / (pLight.constant + (pLight.linear * distance) + (pLight.cuadratic * (distance * distance)));
 
-	// Aplicamos los calculos de las luces y la atenuacion
-	vec3 ambient = (pLight.ambient * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mix_value)) * attenuation;
-	vec3 diffuse = (pLight.diffuse * diffuseIntensity * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mix_value)) * attenuation;
-	vec3 specular = (pLight.specular * specularIntensity * mix(vec3(texture(material.specular, TexCoord)), material.color, mix_value)) * attenuation;
+	// Aplicamos los calculos de las luces y le añadimos la atenuacion
+	vec3 ambient = (pLight.ambient * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mixValue)) * attenuation;
+	vec3 diffuse = (pLight.diffuse * diffuseIntensity * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mixValue)) * attenuation;
+	vec3 specular = (pLight.specular * specularIntensity * mix(vec3(texture(material.specular, TexCoord)), material.color, mixValue)) * attenuation;
 	return (ambient + diffuse + specular);
 }
 
@@ -125,27 +128,28 @@ vec3 calculateSpotLight(SpotLight sLight, vec3 normal, vec3 FragPos, vec3 viewDi
 	// Atenuacion
 	float distance = length(sLight.position - FragPos);
 	float attenuation = 1.0 / (sLight.constant + (sLight.linear * distance) + (sLight.cuadratic * (distance * distance)));
-	// Calculamos los angulos de cierre para la luz dirigida, para saber si entran dentro o no del limite al que enfoca la luz.
-	// Simplemente con el angulo que hacen la direccion de la luz respecto al fragmento y la direccion actual de la luz en si
+	// Calculamos los angulos de cierre para la luz dirigida, para saber si entran dentro o no de un cono y de cuál.
+	// Usamos la dirección de la luz (al revés) y el vector director del fragmento a la luz
 	float limitAngle = dot(lightDir, normalize(-sLight.direction));
-	// Para hacerlo mas natural, tenemos un segundo radio que interpolara las intensidades segun lo cerca o lejos que estes del limite,
-	// dando asi un efecto de desvanecido a la luz. Primero calculamos el angulo limite de esta zona.
+	// Primero calculamos el angulo limite que separa CutOff de OuterCutOff
 	float fadeOffAngle = sLight.cutOff - sLight.outerCutOff;
-	// Hacemos la interpolacion de intensidades. Es un poco complejo matematicamente y no lo termino de entender bien, el caso es que devolvera
-	// un numero mas cercano a 1.0 si esta en el limite interior y 0,0 si esta en el exterior, o entre medias.
+	// Hacemos la interpolacion de intensidades. Devolvera un numero mas cercano a 1.0 si está más cerca
+	// del CutOff y más cercano a 0,0 si lo está del OuterCutOff. Clampeamos el valor para que si está
+	// fuera de ambos conos sea un 0,0 y si está completamente dentro del CutOff sea 1.0.
 	float intensity = clamp((limitAngle - sLight.outerCutOff) / fadeOffAngle, 0.0, 1.0);
-	// Aplicamos todos los valores calculados
-	vec3 ambient = sLight.ambient * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mix_value) * attenuation * intensity;
-	vec3 diffuse = sLight.diffuse * diffuseIntensity * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mix_value) * attenuation *  intensity;
-	vec3 specular = sLight.specular * specularIntensity * mix(vec3(texture(material.specular, TexCoord)), material.color, mix_value) * attenuation * intensity;
+	// Aplicamos todos los valores calculados, añadiendo la intensidad interpolada
+	vec3 ambient = (sLight.ambient * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mixValue)) * attenuation * intensity;
+	vec3 diffuse = (sLight.diffuse * diffuseIntensity * mix(vec3(texture(material.diffuse, TexCoord)), material.color, mixValue)) * attenuation *  intensity;
+	vec3 specular = (sLight.specular * specularIntensity * mix(vec3(texture(material.specular, TexCoord)), material.color, mixValue)) * attenuation * intensity;
 	return (ambient + diffuse + specular);
 }
 
 void main(){
-	// Creamos un colro base para el color que ira aumentando segun las luces
+	// Creamos un color base para el color que ira aumentando según las luces
 	vec3 color = vec3(0.0f, 0.0f, 0.0f);
-	// Importantisimo normalizar tanto la normal como la distancia entre el fragmento y la camara
+	// Importantísimo normalizarla normal interpolada
 	vec3 normal = normalize(Normal);
+	// Sacamos el vector director que apunta desde el fragmento a la cámara
 	vec3 viewDir = normalize(cameraPos - FragPos);
 
 	// Segun el numero de luces que haya anadido el usuario, se calculara tantas veces se necesite cada tipo ce luz

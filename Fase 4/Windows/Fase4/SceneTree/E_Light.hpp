@@ -45,17 +45,16 @@ struct E_Light : virtual public E_Entity {
         spotAngles = cut;
     }
 
-    // Metodo de dibujado, en verdad no necesita ni la matriz ni la camara asi que se lo indico al compilador
-    void draw([[maybe_unused]] glm::mat4 matrix = glm::mat4(1.0f), [[maybe_unused]] E_Camera* principalCamera = nullptr) override {
+    // Metodo de dibujado, en verdad no necesita ni la matriz acumulada ni la camara en este caso
+    void draw(glm::mat4 matrix = glm::mat4(1.0f), E_Camera* principalCamera = nullptr) override {
         // Si hay un shader, hace el dibujado si no pues pa que
         if (shader) {
             // Nos aseguramos que se use el shader
             shader->use();
-            // Preparamos unos strings para el sistema de luces
+            // Preparamos las cadenas para el sistema de nombres dinámico
             std::stringstream confg{};
             std::string light{};
-            // Segun el tipo, manda una informacion al shader u otra. El vector de luces del shader basico tiene espacio para 10, por lo que la id
-            // marca en que posicion de este esta.
+            // Segun el tipo, manda una informacion al shader u otra.
             switch (type) {
             case directional:
                 confg.str("");
@@ -137,8 +136,7 @@ struct E_Light : virtual public E_Entity {
     LightType type{};
     // Un puntero al shader
     Shader* shader{};
-    // La id de la luz en el shader, depende del numero de luces en el arbol. Me da igual que sea un int porque aunque
-    // se meta negativo o se pase mal, OpenGL se lo tragara
+    // La id de la luz en el shader, depende del numero de luces en el arbol.
     int id{};
     // Datos de las luces, la informacion es generica aunque solo se le daran uso a algunos dependiendo de la luz
     glm::vec3 position{};

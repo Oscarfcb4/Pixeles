@@ -38,6 +38,7 @@ struct E_Model: virtual public E_Entity{
 			actualShader.setMat4("modelViewProjection", mvp);
 			// Para el calculo de la normale necesitamos pasarle el modelo 
 			actualShader.setMat4("model", modelMatrix);
+			// Le pasamos la posición de la cámara
 			actualShader.setVec3("cameraPos", glm::vec3(principalCamera->position.x, principalCamera->position.y, principalCamera->position.z));
 			// Le pasamos un material base para el color, si ya hay una textura el mixValue sera 0 por lo que este material no hara nada, 
 			// pero es util cuando no hay texturas en el modelo
@@ -47,7 +48,7 @@ struct E_Model: virtual public E_Entity{
 			// El color definido por el usuario, de base es el amarillo
 			actualShader.setVec3("material.color", glm::vec3(color.r, color.g, color.b));
 			// El mixValue del modelo, que indicara cuanta fuerza tiene el color sobre el resultado final
-			actualShader.setFloat("mix_value", model->getMixValue());
+			actualShader.setFloat("mixValue", model->getMixValue());
 			// Ahora que hemos seteado el shader llamamos al renderizado del modelo
 			model->drawWithShader(actualShader);
 		}
@@ -62,7 +63,7 @@ struct E_Model: virtual public E_Entity{
 	// Asignamos el modelo, el nombre y la ruta diferentes
 	void setModel(std::string name, std::string src, RType type) { model = RM->getModel(name, src, type); };
 	// Busca y asigna una textura al modelo
-	void setTexture(std::string path) { if (model) model->addTexture(path, "texture_diffuse", RM->texturesLoaded); };
+	void setTexture(std::string path) { if (model) model->addTexture(path, "textureDifusse", RM->texturesLoaded); };
 
 	// Un puntero al modelo y al shader
 	R_Model* model{};

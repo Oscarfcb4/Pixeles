@@ -29,28 +29,27 @@ struct R_Mesh{
 
     // Metodo de dibujado en OpenGL
 	void draw(Shader& shader){
-        /// Inicializamos los contadores para las texturas difusas y especulares
-        uint16_t diffuseNr{ 1 };
-        uint16_t specularNr{ 1 };
-        // Por cada una de las texturasm se la vamos pasando a OpenGL siguiendo un sistema donde sabemos que la 0 es la 
-        // textura base del color por lo que el resto deben ser de 1 para arriba por lo que con cada textura que enviamos
-        // vamos aumentando los contadores
-        for (uint16_t i{}; i < textures.size(); i++) {
-            // Activamos la textura con el contador
-            glActiveTexture(GL_TEXTURE0 + i);
-            // Segun el tipo, cogemos el numero del contador de difusas o el de especulares
-            std::string number{};
-            std::string name{ textures[i].type };
-            if (name == "texture_diffuse")
-                number = std::to_string(diffuseNr++);
-            else if (name == "texture_specular")
-                number = std::to_string(specularNr++);
-            // Se lo mandamos al shader
-            shader.setFloat(("material." + name + number).c_str(), static_cast<float>(i));
-            // Y anidamos la textura
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        /// Inicializamos el contador para las texturas
+        uint8_t texturas = 0;
+        // Busca texturas difusas y especulares en sus texturas
+        for (const auto& tex : textures) {
+            if (tex.type == "textureDiffuse") {
+                // Activamos la textura por el número en el que vaya
+                glActiveTexture(GL_TEXTURE0 + texturas);
+                // Enlazamos la ID de cuando la cargamos
+                glBindTexture(GL_TEXTURE_2D, tex.id);
+                // La pasamos como uniform
+                shader.setInt("material.diffuse", texturas);
+                texturas++;
+            }
+            else if (tex.type == "textureSpecular") {
+                glActiveTexture(GL_TEXTURE0 + texturas);
+                glBindTexture(GL_TEXTURE_2D, tex.id);
+                shader.setInt("material.specular", texturas);
+                texturas++;
+            }
         }
-        // Activamos la textura inicial
+        // Activamos la textura inicial, la 0, por si no tenía textura
         glActiveTexture(GL_TEXTURE0);
         // Anidamos el Vertex Array Object
         glBindVertexArray(VAO);
@@ -63,7 +62,7 @@ struct R_Mesh{
     // Si el usuario ha cambiado la mesh y quiere volver a setearlo todo internamente
     void changeMesh(){setupMesh();};
 
-    // Los vectores con la informacion almacenada
+    // Los vectores con la información almacenada
 	std::vector<Vertex> vertices{};
 	std::vector<unsigned int> indices{};
     std::vector<Texture> textures{};
@@ -94,11 +93,12 @@ struct R_Mesh{
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
-            // Normales
+            // Normales, con un offset ya que no es la primera propiedad de
+            // la clase Vertex, offsetof te lo calcula automáticamente
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
-            // Textures
+            // Textures, con un offset también
             glEnableVertexAttribArray(2);
             glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 
