@@ -9,4 +9,5 @@ struct E_Entity{
 
     // Puntero al Resource Manager, solo lo tendran las entidades renderizables por el metodo de recorrido
     ResourceManager* RM{};
+    bool skybox{};
 };

@@ -1,0 +1,14 @@
+-> Cmake (https://cmake.org/download/)
+-> Release de assimp: https://github.com/assimp/assimp/releases
+-> Cabeceras de include - assimp
+-> cd assimp
+cmake CMakeLists.txt
+cmake --build .
+-> Cojer el lib de lib y a librerias
+-> Vinculador - General -> ruta del lib
+-> Cojer el dll de bin y a donde está el main
+-> Vinculador - Entrada -> Nombre exacto del dll
+
+--------------------------
+-> Skybox
+-> Mencionar lo que pasa si falla la carga de texturas del objeto

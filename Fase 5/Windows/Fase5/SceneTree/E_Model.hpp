@@ -63,7 +63,7 @@ struct E_Model: virtual public E_Entity{
 	// Asignamos el modelo, el nombre y la ruta diferentes
 	void setModel(std::string name, std::string src, RType type) { model = RM->getModel(name, src, type); };
 	// Busca y asigna una textura al modelo
-	void setTexture(std::string path) { if (model) model->addTexture(path, "textureDifusse", RM->texturesLoaded); };
+	void setTexture(std::string path) { if (model) model->addTexture(path, "textureDiffuse", RM->texturesLoaded); };
 
 	// Un puntero al modelo y al shader
 	R_Model* model{};

@@ -6,7 +6,7 @@
 
 // Tipos actuales posibles de recursos
 enum RType{
-	RShader, RCube
+	RModel, RShader, RCube
 };
 
 #include "R_Resource.hpp"

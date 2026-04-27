@@ -1,4 +1,7 @@
 #pragma once
+#include <Assimp/Importer.hpp>
+#include <Assimp/scene.h>
+#include <Assimp/postprocess.h>
 #include <stb_image.h>
 #include "R_AllResources.hpp"
 

@@ -26,6 +26,8 @@ struct Node{
     // Metodo que recorre el arbol y dibuja todos sus hijos teniendo en cuenta una camara, normalmente de uso exlusivo de la raiz
     void traversal(glm::mat4 parentMatrix, E_Camera* principalCamera);
 
+    void lookAt(glm::vec3 target, glm::vec4 baseRotation, float yawOffset = 0.0f);
+
     // Metodo para recuperar y asignar una camara principal, de nuevo solo util en la raiz
     void setPrincipalCamera(E_Camera* newPCamera){principalCamera = newPCamera;};
     E_Camera* getPrincipalCamera(){return principalCamera;};

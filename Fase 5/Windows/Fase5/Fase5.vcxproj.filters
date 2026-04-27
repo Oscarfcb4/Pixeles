@@ -54,6 +54,9 @@
     <ClInclude Include="SceneTree\E_Light.hpp">
       <Filter>SceneTree</Filter>
     </ClInclude>
+    <ClInclude Include="SceneTree\E_Skybox.hpp">
+      <Filter>SceneTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SceneTree">
@@ -67,10 +70,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\FragmentShader.fs">
+    <None Include="Shaders\DefaultFragmentShader.fs">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="Shaders\VertexShader.vs">
+    <None Include="Shaders\DefaultVertexShader.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\SkyboxFragmentShader.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\SkyboxVertexShader.vs">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

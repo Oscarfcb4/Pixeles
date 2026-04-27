@@ -6,3 +6,4 @@
 #include "E_Camera.hpp"
 #include "E_Light.hpp"
 #include "E_Model.hpp"
+#include "E_Skybox.hpp"

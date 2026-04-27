@@ -46,6 +46,25 @@ void Node::scale(glm::vec3 toScale) {
     transMatrix = glm::scale(transMatrix, glm::vec3(toScale.x, toScale.y, toScale.z));
 }
 
+void Node::lookAt(glm::vec3 target, glm::vec4 baseRotation, float yawOffset) {
+    glm::vec3 position = glm::vec3(transMatrix[3]);
+    glm::vec3 scale = glm::vec3(
+        glm::length(glm::vec3(transMatrix[0])),
+        glm::length(glm::vec3(transMatrix[1])),
+        glm::length(glm::vec3(transMatrix[2]))
+    );
+    glm::vec3 direction = glm::normalize(target - position);
+    float yaw = atan2(direction.x, direction.z) + glm::radians(yawOffset);
+    float pitch = asin(direction.y);
+    transMatrix = glm::mat4(1.0f);
+    transMatrix = glm::translate(transMatrix, position);
+    transMatrix = glm::rotate(transMatrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+    transMatrix = glm::rotate(transMatrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+    transMatrix = glm::rotate(transMatrix, glm::radians(baseRotation.w),
+        glm::vec3(baseRotation.x, baseRotation.y, baseRotation.z));
+    transMatrix = glm::scale(transMatrix, scale);
+}
+
 // Recorrido del arbol
 void Node::traversal(glm::mat4 parentMatrix, E_Camera* prCamera) {
     // Le pasa la matriz del padre y recalcula la matriz de transformación, volviéndose la acumulada
@@ -53,7 +72,7 @@ void Node::traversal(glm::mat4 parentMatrix, E_Camera* prCamera) {
 
     // Si tiene entidad y esta entidad tiene un puntero a un ResourceManager que existe, 
     // le manda a dibujar. Esto se hace para evitar dibujar las camaras aqui.
-    if (entity && entity->RM)
+    if (entity && entity->RM && !entity->skybox)
         entity->draw(cumulativeMatrix, prCamera);
     // Recursivamente llamamos a los hijos
     for (auto& c : childs)

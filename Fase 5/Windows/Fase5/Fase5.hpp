@@ -14,7 +14,7 @@
 
 constexpr unsigned int ANCHO{ 1280 };
 constexpr unsigned int ALTO{ 720 };
-constexpr const char* NOMBRE = "Iluminando la escena";
+constexpr const char* NOMBRE = "Complicando las mallas";
 
 // Definimos nuestro propio tipo color
 typedef struct Color {
