@@ -8,7 +8,7 @@ std::unique_ptr<Node> sceneRoot{};
 // Instancia del gestor de recursos
 ResourceManager RM{};
 // Nos guardamos un puntero a nuestro shader básico
-Shader* basicShader{};
+Shader* defaultShader{};
 Shader* skyboxShader{};
 std::unique_ptr<E_Skybox> skyboxModel{};
 
@@ -123,7 +123,7 @@ Node* createPointLight(glm::vec3 pos, glm::vec3 amb, glm::vec3 dif,
 	auto entityLight = std::make_unique<E_Light>();
 	lights.push_back(std::move(entityLight));
 	auto& eLight = lights[lights.size() - 1];
-	eLight->shader = basicShader;
+	eLight->shader = defaultShader;
 	// Crea una luz puntual en la entidad luz con los parametros
 	eLight->setPointLight(pos, amb, dif, spc, att);
 	// Esta vez usamos el numero de luces puntuales
@@ -143,7 +143,7 @@ Node* createSpotLight(glm::vec3 pos, glm::vec3 dir, glm::vec3 amb, glm::vec3 dif
 	auto entityLight = std::make_unique<E_Light>();
 	lights.push_back(std::move(entityLight));
 	auto& eLight = lights[lights.size() - 1];
-	eLight->shader = basicShader;
+	eLight->shader = defaultShader;
 	// Crea una luz focal en la entidad luz con los parametros
 	eLight->setSpotLight(pos, dir, amb, dif, spc, att, cut);
 	// Esta vez aumentamos el numero de luces focales
@@ -163,11 +163,7 @@ Node* createModel(std::string path, glm::vec3 pos, glm::vec3 size, float rotAngl
 	auto entityModel = std::make_unique<E_Model>(&RM, path, RType::RModel);
 	models.push_back(std::move(entityModel));
 	auto& eModel = models[models.size() - 1];
-	// Si el shader no es el basico, lo setea (este metodo lo buscara en el resource manager)
-	if (shader != "default")
-		eModel->setShader(shader);
-	else
-		eModel->setShader("default");
+	eModel->setShader("default");
 	// Translada el modelo a la posicion por parametro
 	nModel->translate(pos);
 	// Luego lo rota
@@ -185,11 +181,11 @@ Node* loadSkybox() {
 	auto nodeCube = std::make_unique<Node>();
 	nodes.push_back(std::move(nodeCube));
 	auto& nCube = nodes[nodes.size() - 1];
-	// Como siempre va a ser igual le pasamos ya las cosas por el constructor
+	// Es un cubo básico así que lo enviamos con el mismo nombre que el cubo sin textura
 	auto entityModel = std::make_unique<E_Skybox>(&RM, "Cubo", RType::RCube);
 	skyboxModel = std::move(entityModel);
 	auto& eCube = skyboxModel;
-	// El cubo siempre va a tener solo un shader, el base
+	// El skybox necesita su shader
 	eCube->setShader("skybox");
 	eCube->setAspect(aspect);
 	nCube->setEntity(std::move(eCube.get()));
@@ -198,18 +194,28 @@ Node* loadSkybox() {
 }
 
 Node* createSkybox(std::vector<std::string> faces) {
+	// Enlazamos la textura cúbica que cargamos en el setup
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
 	int width{}, height{}, nrChannels{};
 	for (uint16_t i{}; i < faces.size(); i++) {
+		// Por cada una de sus caras, leemos la textura
 		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		// Si la ha leido, añade la textura al cubeMap
 		if (data) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(
+				// Esto de aquí es importante, indice el orden en el que se van a meter
+				// las imágenes en el cubo. El X positivo será el incio del cubo y el i
+				// será el offset que irá aumentando conforme vayamos cargando caras
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		}
 		else {
+			// Si no ha cargado debugeamos
 			std::cout << "ERROR::SKYBOX::Source skybox images cannot load" << std::endl;
 		}
 		stbi_image_free(data);
 	}
+	// Ahora que ya hemos cargado las texturas, creamos la entidad
 	return loadSkybox();
 }
 
@@ -321,12 +327,12 @@ bool configurarOpenGL() {
 	glEnable(GL_DEPTH_TEST);
 	// Activamos el Face Culling
 	glEnable(GL_CULL_FACE);
-	// Aunque viene por defecto, por si acaso, le decimos que solo lo haga con las caras traseras
-	glCullFace(GL_BACK);
 
 	glGenTextures(1, &skybox);
+	// El cambio importante es que usamos el enumerado GL_TEXTURE_CUBE_MAP
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox); glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+	// Configuramos el texture sampling
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -347,7 +353,7 @@ int main() {
 	// Creamos la cámara principal
 	Node* camara = createCamera(glm::vec3(-0.3f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 	// Leemos los shaders, primero el default
-	basicShader = &RM.getShader("default", "./Shaders/DefaultVertexShader.vs", "./Shaders/DefaultFragmentShader.fs")->shader;
+	defaultShader = &RM.getShader("default", "./Shaders/DefaultVertexShader.vs", "./Shaders/DefaultFragmentShader.fs")->shader;
 	// Luego el del skybox
 	skyboxShader = &RM.getShader("skybox", "./Shaders/SkyboxVertexShader.vs", "./Shaders/SkyboxFragmentShader.fs")->shader;
 
@@ -392,17 +398,15 @@ int main() {
 	// Cargamos la textura para el cubo rojo, el primero
 	dynamic_cast<E_Model*>(cubo1->getEntity())->setTexture("./Resources/Caja.png");
 
+	// Creamos el modelo del nivel y lo colocamos en el mundo
 	Node* nivel = createModel("./resources/Mapa.obj", glm::vec3(-1.0f, -3.5f, 15.0f), 
 		glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f), "default");
 
-	// Cargamos la textura para el cubo rojo, el primero
+	// Cargamos la textura para el nivel
 	dynamic_cast<E_Model*>(nivel->getEntity())->setTexture("./Resources/Mapa.png");
 
 	Node* personaje = createModel("./resources/Personaje.fbx", glm::vec3(-5.0f, -1.5f, 0.0f),
 		glm::vec3(0.01f, 0.01f, 0.01f), -90.0f, glm::vec3(1.0f, 0.0f, 0.0f), "default");
-
-	// Cargamos la textura para el cubo rojo, el primero
-	dynamic_cast<E_Model*>(personaje->getEntity())->setTexture("./Resources/Personaje.png");
 
 	std::vector<std::string> caras{};
 	caras.push_back("./Resources/Skybox/right.jpg");
@@ -447,16 +451,18 @@ int main() {
 		sp->position = cameras.at(0)->position;
 		sp->direction = cameras.at(0)->front;
 
-		personaje->lookAt(cameras.at(0)->position, glm::vec4(1.0f, 0.0f, 0.0f, -90.0f), 180.0f);
+		// Que nuestro personaje nos persiga con la mirada
+		personaje->lookAt(sceneRoot->getPrincipalCamera()->position, glm::vec4(1.0f, 0.0f, 0.0f, -90.0f), 180.0f);
 
 		// Renderizamos primero las luces, asi da igual el orden en los que las haya metido el usuario en el arbol
 		for (auto& l : lights)
 			l->draw(glm::mat4{ 1.0f }, sceneRoot->getPrincipalCamera());
 		// Le decimos al shader cuantas luces hay de cada tipo
-		basicShader->setInt("n_directionalLights", static_cast<int>(numLights.x));
-		basicShader->setInt("n_pointLights", static_cast<int>(numLights.y));
-		basicShader->setInt("n_spotLights", static_cast<int>(numLights.z));
+		defaultShader->setInt("n_directionalLights", static_cast<int>(numLights.x));
+		defaultShader->setInt("n_pointLights", static_cast<int>(numLights.y));
+		defaultShader->setInt("n_spotLights", static_cast<int>(numLights.z));
 
+		// Dibujamos el skybox
 		skyboxModel->draw(glm::mat4{ 1.0f }, sceneRoot->getPrincipalCamera());
 
 		// Recorremos el arbol

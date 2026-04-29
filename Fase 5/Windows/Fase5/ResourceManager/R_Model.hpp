@@ -24,18 +24,20 @@ struct R_Model: virtual public R_Resource{
 			// Metemos en una mesh el cubo
 			meshes.push_back(processCube());
 		}else if (rt == RType::RModel) {
+			// Actualizamos el texturesLoaded con el que recibimos del gestor de recursos
 			this->texturesLoaded = &texturesLoaded;
 			// Iniciamos el importador de Assimp
 			Assimp::Importer importer{};
-			// Con el lector de Assimp, leemos el modelo y recuperamos la escena
-			const aiScene* scene = importer.ReadFile(path, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_GenSmoothNormals
-				| aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+			// Con el lector de Assimp, leemos el modelo y recuperamos la escena, usando las flags que queramos
+			const aiScene* scene = importer.ReadFile(path, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate 
+				| aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 			// Si no ha habido escena, esta vacia o Assimp nos marcaa un error, lo mostramos por consola
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 				std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 				return;
 			}
-			directory = path.substr(0, path.find_last_of('/'));
+			// Guardamos la ruta donde está guardado el modelo
+			directory = path.substr(0, path.find_last_of("\\/"));
 			// Procesamos la informacion de Assimp
 			processNode(scene->mRootNode, scene);
 		}
@@ -67,10 +69,10 @@ struct R_Model: virtual public R_Resource{
 			vertices.push_back(Vertex{ glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec2(1.0f, 0.0f) });
 
 			// Cara frontal (z = 0.5)
-			vertices.push_back(Vertex{ glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec2(0.0f, 1.0f) });
+			vertices.push_back(Vertex{ glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec2(1.0f, 1.0f) });
 			vertices.push_back(Vertex{ glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec2(1.0f, 0.0f) });
 			vertices.push_back(Vertex{ glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec2(0.0f, 0.0f) });
-			vertices.push_back(Vertex{ glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec2(1.0f, 1.0f) });
+			vertices.push_back(Vertex{ glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec2(0.0f, 1.0f) });
 			
 			// Cara izquierda (x = -0.5)
 			vertices.push_back(Vertex{ glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec2(1.0f, 1.0f) });
@@ -118,27 +120,27 @@ struct R_Model: virtual public R_Resource{
 			return R_Mesh(vertices, indices, textures);
 		}
 
-		// Por cada una de las mallas del nodo del modelo actualiza el vector de mallas y recursivamente hace lo mismo con los hijos de la mismo
+		// Por cada una de las mallas del nodo del modelo actualiza el vector de mallas y recursivamente hace lo mismo con los hijos
 		void processNode(aiNode* node, const aiScene* scene) {
 			for (unsigned int i{}; i < node->mNumMeshes; i++) {
-				// Usamos solo un puntero a la malla para procesar dicha malla
+				// Usamos solo un puntero a la malla para procesarla
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				// Actualizamos el vector de mallas con la malla procesada
+				// Procesamos la malla y la metemos en el vector de mallas
 				meshes.push_back(processMesh(mesh, scene));
 			}
-			// Lo mismo para cada hijo de este nodo
+			// Lo mismo para cada hijo de este nodo, recorriendo el árbol
 			for (unsigned int i{}; i < node->mNumChildren; i++) {
 				processNode(node->mChildren[i], scene);
 			}
 		}
 
-		// Procesa la informacion de la malla y devuelve un tipo malla propio
+		// Procesa la informacion de la malla de Assimp y devuelve un tipo malla propio
 		R_Mesh processMesh(aiMesh* mesh, const aiScene* scene) {
-			// Nuestro tipo malla propio puede tener n vertices, n indices y n texturas, asi que creamos unos vectores para almacenarlos
+			// Nuestros vectores para almacenar la info de la malla
 			std::vector<Vertex> vertices{};
 			std::vector<unsigned int> indices{};
 			std::vector<Texture> textures{};
-			// Por cada vertice, lo va procesando
+			// Por cada vertice de la malla, procesa su información
 			for (unsigned int i{}; i < mesh->mNumVertices; i++) {
 				// Creamos el vertex
 				Vertex vertex{};
@@ -157,25 +159,27 @@ struct R_Model: virtual public R_Resource{
 					vertex.texCoord.x = mesh->mTextureCoords[0][i].x;
 					vertex.texCoord.y = mesh->mTextureCoords[0][i].y;
 				}
-				// Ahora anade al vector de vertices el vertex
+				// Ahora anade al vector de vertices el vertex leído
 				vertices.push_back(vertex);
 			}
 			// Por cada cara aprovechamos y le sacamos los indices
 			for (unsigned int i{}; i < mesh->mNumFaces; i++) {
 				// Recuperamos cada cara
 				aiFace face{ mesh->mFaces[i] };
-				// Por cada indice lo va metiendo en el vector de indices
+				// Assimp ya guarda la información de los índices dentro de la cara, 
+				// así que la recuperamos y vamos informando el vector de índices
 				for (unsigned int j{}; j < face.mNumIndices; j++)
 					indices.push_back(face.mIndices[j]);
 			}
 			// Recuperamos el material desde la escena con el indice que guarda la malla
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 			// Hacemos un vector temporal con todos los mapas de difusion
-			std::vector<Texture> diffuseMaps{ loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse") };
-			// Insertamos al final de textures los mapas difusos
+			std::vector<Texture> diffuseMaps{ loadMaterialTextures(material, aiTextureType_DIFFUSE, "textureDiffuse") };
+			// Insertamos al final de textures los mapas difusos, vamos que pegamos el vector de texturas
+			// que ha cargado Assimp al final de nuestro propio vector de texturas
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 			// Hacemos lo mismo con las texturas especulares
-			std::vector<Texture> specularMaps{ loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular") };
+			std::vector<Texture> specularMaps{ loadMaterialTextures(material, aiTextureType_SPECULAR, "textureSpecular") };
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 			// Devolvemos un mesh propio con todo
 			return R_Mesh(vertices, indices, textures);
@@ -183,27 +187,36 @@ struct R_Model: virtual public R_Resource{
 
 		// Carga las texturas de los materiales
 		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName) {
-			// Como podria tener muchas texturas, hacemos un vector
+			// Como podria tener muchas texturas, hacemos un vector local de texturas para luego devolverlas
 			std::vector<Texture> textures{};
+			// Recuperamos el número de texturas que hay en el material con ese tipo en concreto			
 			if (mat->GetTextureCount(type) != 0) {
 				// Como hay textura, el valor de mexcla sera 0 y no cuenta el color
 				mixValue = 0.0f;
-				// Por cada tectura, comprobamos si existe en las texturas cargadas, si no la creamos
+				// Por cada textura, comprobamos si existe en las texturas cargadas, si no la creamos
 				for (unsigned int i{}; i < mat->GetTextureCount(type); i++) {
+					// Inicializamos la cadena para recuperar el nombre
 					aiString str{};
+					// Recuperamos la textura
 					mat->GetTexture(type, i, &str);
-					bool skip{};
+					// Booleano para saber si la ha encontrado
+					bool encontrada{};
+					// Recorremos nuestro vector de texturas cargadas que antes recuperamos del gestor de recursos
 					for (unsigned int j{}; j < texturesLoaded->size(); j++) {
+						// Comprobamos que los nombres sean iguales
 						if (std::strcmp(texturesLoaded->at(j).path.data(), str.C_Str()) == 0) {
+							// Si existe alguna igual, la cargamos y marcamos como encontrada
 							textures.push_back(texturesLoaded->at(j));
-							skip = true;
+							encontrada = true;
 							break;
 						}
 					}
 					// Si no lo ha encontrado, la crea
-					if (!skip) {
+					if (!encontrada) {
 						Texture texture{};
+						// Cargamos la textura con las rutas de la textura y el modelo
 						texture.id = textureFromFile(str.C_Str(), this->directory);
+						// Guardamos el tipo, la ruta y lo metemos en nuestro vector local de texturas
 						texture.type = typeName;
 						texture.path = str.C_Str();
 						textures.push_back(texture);
@@ -216,7 +229,7 @@ struct R_Model: virtual public R_Resource{
 		}
 
 		// Metodo para recuperar la textura segun un archivo y un directorio
-		unsigned int textureFromFile(const char* path, const std::string& directory, [[maybe_unused]] bool gamma = false) {
+		unsigned int textureFromFile(const char* path, const std::string& directory, bool gamma = false) {
 			// Ajustamos el path. Esto es feo pero Assimp lo necesita asi asi que bueno
 			std::string filename{ std::string(path) };
 			filename = directory + '/' + filename;
@@ -255,9 +268,9 @@ struct R_Model: virtual public R_Resource{
 
 				// Liberamos la informacion de los datos
 				stbi_image_free(data);
-			}
-			else {
-				std::cout << "_Texture failed to load in: " << path << " (A.K.A '" << directory << "')" << std::endl;
+			} else {
+				// Debugeamos y nos pasamos el path y el directorio que ha intentado cargar (lo agradecerás)
+				std::cout << "Texture failed to load in: " << path << " (A.K.A '" << directory << "')" << std::endl;
 				stbi_image_free(data);
 			}
 			// Devolvemos la ID que le ha asignado OpenGL a la textura 

@@ -46,20 +46,30 @@ void Node::scale(glm::vec3 toScale) {
     transMatrix = glm::scale(transMatrix, glm::vec3(toScale.x, toScale.y, toScale.z));
 }
 
+// Método que rota el nodo hacia el objetivo, extrayendo la posicion y escala de la matriz actual
 void Node::lookAt(glm::vec3 target, glm::vec4 baseRotation, float yawOffset) {
+    // Extrae la posicion de la columna 3 de la matriz de transformacion
     glm::vec3 position = glm::vec3(transMatrix[3]);
+    // Extrae la escala calculando la longitud de las columnas de la matriz
     glm::vec3 scale = glm::vec3(
         glm::length(glm::vec3(transMatrix[0])),
         glm::length(glm::vec3(transMatrix[1])),
         glm::length(glm::vec3(transMatrix[2]))
     );
+    // Calcula la direccion normalizada hacia el objetivo
     glm::vec3 direction = glm::normalize(target - position);
+    // Calcula el angulo yaw (eje Y) y pitch (eje X) a partir de la direccion. Se le pasa el yawOffset por si el
+    // modelo base no nace mirando al eje +Z, con este offset podrás girarlo para que apunte al eje correcto
     float yaw = atan2(direction.x, direction.z) + glm::radians(yawOffset);
     float pitch = asin(direction.y);
+    // Reconstruye la matriz de transformación desde cero, reseteandola
     transMatrix = glm::mat4(1.0f);
+    // Primero recoloca el objeto
     transMatrix = glm::translate(transMatrix, position);
+    // Aplicamos la transformación para que acabe mirándote
     transMatrix = glm::rotate(transMatrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
     transMatrix = glm::rotate(transMatrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+    // Aplica la rotacion base adicional, la orientacion inicial del modelo
     transMatrix = glm::rotate(transMatrix, glm::radians(baseRotation.w),
         glm::vec3(baseRotation.x, baseRotation.y, baseRotation.z));
     transMatrix = glm::scale(transMatrix, scale);
@@ -72,6 +82,7 @@ void Node::traversal(glm::mat4 parentMatrix, E_Camera* prCamera) {
 
     // Si tiene entidad y esta entidad tiene un puntero a un ResourceManager que existe, 
     // le manda a dibujar. Esto se hace para evitar dibujar las camaras aqui.
+    // También eviatmos que se dibuje el skybox
     if (entity && entity->RM && !entity->skybox)
         entity->draw(cumulativeMatrix, prCamera);
     // Recursivamente llamamos a los hijos
