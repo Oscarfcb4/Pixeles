@@ -114,7 +114,7 @@ void Pixeles::start() {
 // Final del dibujado, se encarga de renderizar
 void Pixeles::end() {
     // Si el usuario no ha creado luces, crea una luz direccional para que haya al menos una
-    if (lights.size() == 0 && light)
+    if (lights.size() == 0)
         createDirectionalLight();
 
     // Llamamos al metodo de dibujado global
@@ -127,7 +127,7 @@ void Pixeles::end() {
 
 void Pixeles::endNoSwap() {
     // Si el usuario no ha creado luces, crea una luz direccional para que haya al menos una
-    if (lights.size() == 0 && light)
+    if (lights.size() == 0)
         createDirectionalLight();
 
     // Llamamos al metodo de dibujado global
@@ -195,8 +195,10 @@ E_Light* Pixeles::createDirectionalLight(Vec3 amb, Vec3 dir, Vec3 dif, Vec3 spc,
     auto entityLight = std::make_unique<E_Light>();
     lights.push_back(std::move(entityLight));
     auto& eLight = lights[lights.size() - 1];
-    // Como ya estará cargado en memoria el gestor de recurso nos devolverá su ID de OpenGL
-    eLight->shader = &RM.getShader(shader, shader, shader)->shader;
+    if(shader != "default")
+        eLight->shader = &RM.getShader(shader, shader, shader)->shader;
+    else
+        eLight->shader = defaultShader;
     // Crea una luz direccional en la entidad luz con los parametros
     eLight->setDirectionalLight(parseGLM(dir), parseGLM(amb), parseGLM(dif), parseGLM(spc));
     // Marcamos la id como el numero actual de luces direccionales
@@ -216,7 +218,10 @@ E_Light* Pixeles::createPointLight(Vec3 pos, Vec3 amb, Vec3 dif, Vec3 spc, Vec3 
     auto entityLight = std::make_unique<E_Light>();
     lights.push_back(std::move(entityLight));
     auto& eLight = lights[lights.size() - 1];
-    eLight->shader = defaultShader;
+    if(shader != "default")
+        eLight->shader = &RM.getShader(shader, shader, shader)->shader;
+    else
+        eLight->shader = defaultShader;
     // Crea una luz puntual en la entidad luz con los parametros
     eLight->setPointLight(parseGLM(pos), parseGLM(amb), parseGLM(dif), parseGLM(spc), parseGLM(att));
     // Esta vez usamos el numero de luces puntuales
@@ -236,8 +241,11 @@ E_Light* Pixeles::createSpotLight(Vec3 pos, Vec3 dir, Vec3 amb, Vec3 dif, Vec3 s
     auto entityLight = std::make_unique<E_Light>();
     lights.push_back(std::move(entityLight));
     auto& eLight = lights[lights.size() - 1];
-    eLight->shader = defaultShader;
-    glm::vec2 cones = glm::vec2(glm::cos(glm::radians(cut.x)), glm::cos(cut.y));
+    if(shader != "default")
+        eLight->shader = &RM.getShader(shader, shader, shader)->shader;
+    else
+        eLight->shader = defaultShader;
+    glm::vec2 cones = glm::vec2(glm::cos(glm::radians(cut.x)), glm::cos(glm::radians(cut.y)));
     // Crea una luz focal en la entidad luz con los parametros
     eLight->setSpotLight(parseGLM(pos), parseGLM(dir), parseGLM(amb), parseGLM(dif), parseGLM(spc), parseGLM(att), cones);
     // Esta vez aumentamos el numero de luces focales
@@ -257,7 +265,7 @@ E_Model* Pixeles::createModel(std::string path, Vec3 pos, Vec3 size, float rotAn
     auto entityModel = std::make_unique<E_Model>(&RM, path, RType::RModel);
     models.push_back(std::move(entityModel));
     auto& eModel = models[models.size() - 1];
-    eModel->setShader("default");
+    eModel->setShader(shader);
     // Translada el modelo a la posicion por parametro
     nModel->translate(parseGLM(pos));
     // Luego lo rota

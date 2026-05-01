@@ -13,6 +13,8 @@
 #include <Pixeles/Shader.hpp>
 #include <Pixeles/ResourceManager.hpp>
 #include <Pixeles/PixelesTypes.hpp>
+#include <Pixeles/E_AllEntities.hpp>
+#include <Pixeles/SceneTree.hpp>
 
 constexpr unsigned int ANCHO{ 1280 };
 constexpr unsigned int ALTO{ 720 };
@@ -114,9 +116,6 @@ struct Pixeles {
     void setTexture(E_Model* image, std::string path);
     void setTexture(Node* image, std::string path);
 
-    void enableLights() { light = true; };
-    void disableLights() { light = false; };
-
     // Getters para los valores privados 
     GLFWwindow* getMainWindow() { return mainWindow; };
     Shader* getDefaultShader() { return defaultShader; };
@@ -163,7 +162,7 @@ private:
     // Z -> Luces especulares
     glm::vec3 numLights{};
     // Booleano para ver si esta activo el motor o no
-    bool active{}, skyLoaded{}, light{};
+    bool active{}, skyLoaded{};
     uint16_t SCREEN_WIDTH{}, SCREEN_HEIGHT{};
     unsigned int skybox{};
 };

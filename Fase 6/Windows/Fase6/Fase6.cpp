@@ -1,12 +1,10 @@
 #include <Pixeles/Pixeles.hpp>
-#include <Pixeles/E_AllEntities.hpp>
-#include <Pixeles/SceneTree.hpp>
 
 // Variables para deltaTime
 float lastFrame{};
 float deltaTime{};
 
-Pixeles MG{ 1280, 720, "Tu Primer Motor Gráfico"};
+Pixeles MG{ 1280, 720, "Tu Primer Motor Gráfico" };
 
 E_Camera* principalCamera{};
 
@@ -33,9 +31,52 @@ void processInput() {
 	}
 }
 
+// Guardamos las posiciones anteriores del ratón
+float lastX{}, lastY{};
+// Si es la primera lectura del ratón
+bool firstMouse{ true };
+
+// Procesamos los inputs del movimiento del ratón
+void movimientoRaton(GLFWwindow* window, double xPosIn, double yPosIn) {
+	// Guardamos la posición que nos pasa GLFW
+	float xPos{ static_cast<float>(xPosIn) };
+	float yPos{ static_cast<float>(yPosIn) };
+
+	// Si es la primera vez que leemos el ratón, la guardamos antes de actualizarlas
+	if (firstMouse) {
+		lastX = xPos;
+		lastY = yPos;
+		firstMouse = false;
+	}
+
+	// Calculamos la diferencia entre la posicion actual y la anterior en ambos ejes
+	float xOffset{ xPos - lastX };
+	float yOffset{ lastY - yPos };
+	// Actualizamos
+	lastX = xPos;
+	lastY = yPos;
+
+	// Recuperamos la cámara principal, en el caso de que haya
+	if (principalCamera != NULL)
+		// Con la diferencia entre posiciones, llamamos a nuestro método de movimiento del ratón
+		principalCamera->processMouseMovement(xOffset, yOffset);
+}
+
+// Procesamos el input de la rueda del ratón, necesita X e Y por compatibilidad con dispositivos raros
+void zoomRaton(GLFWwindow* window, double xOffset, double yOffset) {
+	// Si tiene cámara principal, la usamos
+	if (principalCamera != NULL)
+		// A nosotros obviamente sólo nos interesa el movimiento vertical
+		principalCamera->processMouseScroll(static_cast<float>(yOffset));
+}
+
 int main() {
 	// Creamos la cámara principal
 	principalCamera = MG.createCamera(Vec3(-0.3f, 0.0f, 5.0f), Vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
+
+	glfwSetCursorPosCallback(MG.getMainWindow(), movimientoRaton);
+	glfwSetScrollCallback(MG.getMainWindow(), zoomRaton);
+	glfwSetInputMode(MG.getMainWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// Creamos las luces
 	MG.createDirectionalLight();
