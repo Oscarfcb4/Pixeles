@@ -1,18 +1,20 @@
-#include <Pixeles/Pixeles.hpp>
+// Sólo hace falta incluir Pixeles
+#include <Pixeles.hpp>
 
 // Variables para deltaTime
 float lastFrame{};
 float deltaTime{};
 
+// Instanciamos el motor
 Pixeles MG{ 1280, 720, "Tu Primer Motor Gráfico" };
 
+// Guardamos un puntero a nuestra cámara principal
 E_Camera* principalCamera{};
 
-// Procesamos los inputs del teclado de los usuarios con GLFW
+// Procesamos los inputs pero con nuestro motor
 void processInput() {
-	// El movimiento de la cámara con WASD, usando los enumerados de GLFW y glfwGetKey
+	// Es lo mismo pero escondemos GLFW
 	if(MG.isKeyPressed(K_W)) {
-		// Recuperamos la cámara de nuestro vector y usamos nuestro método de movimiento
 		principalCamera->processKeyboard(FORWARD, deltaTime);
 	}
 	if(MG.isKeyPressed(K_S)) {
@@ -74,11 +76,13 @@ int main() {
 	// Creamos la cámara principal
 	principalCamera = MG.createCamera(Vec3(-0.3f, 0.0f, 5.0f), Vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f);
 
+	// Seteamos lo del ratón (No lo he escondido para ir rápido, pero podrías hacerlo si quieres)
 	glfwSetCursorPosCallback(MG.getMainWindow(), movimientoRaton);
 	glfwSetScrollCallback(MG.getMainWindow(), zoomRaton);
 	glfwSetInputMode(MG.getMainWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	// Creamos las luces
+	// Creamos las luces con nuestro motor, como ves ya no es 
+	// necesario que le pasemos todos los parámetros
 	MG.createDirectionalLight();
 	MG.createPointLight(
 		Vec3(-3.8f, 0.0f, -12.3f), Vec3(0.2f, 0.2f, 0.2f), Vec3(0.8f, 0.8f, 0.8f),
@@ -88,7 +92,7 @@ int main() {
 		Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Vec3(1.0f, 1.0f, 1.0f),
 		Vec3(1.0f, 0.09f, 0.032f), Vec2(12.5f, 15.0f));
 
-	// Creamos los cubos, igual que en la Fase2
+	// Creamos los cubos
 	std::vector<E_Model*> cubos{};
 	E_Model* cubo1  = MG.createCube(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), Color(1.0f, 0.0f, 0.0f, 1.0f),  45.0f, Vec3(1.0f, 0.0f, 0.0f), true);
 	E_Model* cubo2  = MG.createCube(Vec3(2.0f, 5.0f, -15.0f), Vec3(1.0f, 1.0f, 1.0f), Color(0.0f, 1.0f, 0.0f, 1.0f), 45.0f, Vec3(1.0f, 0.0f, 0.0f));
@@ -123,9 +127,11 @@ int main() {
 	// Cargamos la textura para el nivel
 	nivel->setTexture("./Resources/Mapa.png");
 
+	// Cargamos el personaje
 	E_Model* personaje = MG.createModel("./resources/Personaje.fbx", Vec3(-5.0f, -1.5f, 0.0f),
 		Vec3(0.01f, 0.01f, 0.01f), -90.0f, Vec3(1.0f, 0.0f, 0.0f));
 
+	// Cargamos el skybox
 	std::vector<std::string> caras{};
 	caras.push_back("./Resources/Skybox/right.jpg");
 	caras.push_back("./Resources/Skybox/left.jpg");
@@ -135,15 +141,16 @@ int main() {
 	caras.push_back("./Resources/Skybox/back.jpg");
 	MG.createSkybox(caras);
 
-	// Inicializamos el bucle de renderizado
+	// Inicializamos el bucle de renderizado, usando nuestro motor
 	while (MG.rendering()) {
+		// Iniciamos el start de nuestro motor
 		MG.start();
 		// Controlamos el input del usuario
 		processInput();
 		// Limpiamos el fondo
 		MG.cleanBackground(Color(100.0f, 100.0f, 100.0f, 255.0f));
 
-		// Calculamos el deltaTime
+		// Calculamos el deltaTime (Esto podría hacerlo tu motor si quieres)
 		float currentFrame = MG.getTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -169,10 +176,12 @@ int main() {
 
 		// Que nuestro personaje nos persiga con la mirada
 		personaje->lookAt(principalCamera->getPosition(), Vec4(1.0f, 0.0f, 0.0f, -90.0f), 180.0f);
-
+		
+		// Finalizamos y renderizamos
 		MG.end();
 	}
 
+	// Cerramos la ventana cuando termine
 	MG.closeWindow();
 	return 0;
 }

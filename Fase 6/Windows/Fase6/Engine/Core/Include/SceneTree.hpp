@@ -2,8 +2,8 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
-#include <Pixeles/Shader.hpp>
-#include <Pixeles/E_AllEntities.hpp>
+#include <Shader.hpp>
+#include <E_AllEntities.hpp>
 
 // Clase nodo, con todo lo necesario para gestionar el arbol
 

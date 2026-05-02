@@ -1,5 +1,5 @@
-#include <Pixeles/SceneTree.hpp>
-#include <Pixeles/E_Entity.hpp>
+#include <SceneTree.hpp>
+#include <E_Entity.hpp>
 
 // Anade el hijo pasado como parametro al nodo actual y devuelve la cantidad de hijos
 uint32_t Node::addChild(Node* newNode) {

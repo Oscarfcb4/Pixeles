@@ -1,6 +1,6 @@
 #pragma once
 #include <GLM/glm.hpp>
-#include <Pixeles/Shader.hpp>
+#include <Shader.hpp>
 
 // Clase Vertex, que contiene la informacion de un punto 
 // 3D necesario para el renderizado en OpenGL

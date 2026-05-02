@@ -1,8 +1,11 @@
 #include <string>
 #include <vector>
-#include <Pixeles/ResourceManager.hpp>
-#include <Pixeles/Shader.hpp>  
-#include <Pixeles/R_Model.hpp>
+#include <ResourceManager.hpp>
+#include <Shader.hpp>  
+#include <R_Model.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <STB/stb_image.h>
 
 // Implementacion de addTexture para R_Model
 void R_Model::addTexture(const std::string& path, const std::string& type, std::vector<Texture>& texturesLoaded) {

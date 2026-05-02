@@ -10,11 +10,11 @@
 #include <memory>
 #include <algorithm>
 #include <cstdint>
-#include <Pixeles/Shader.hpp>
-#include <Pixeles/ResourceManager.hpp>
-#include <Pixeles/PixelesTypes.hpp>
-#include <Pixeles/E_AllEntities.hpp>
-#include <Pixeles/SceneTree.hpp>
+#include <Shader.hpp>
+#include <ResourceManager.hpp>
+#include <PixelesTypes.hpp>
+#include <E_AllEntities.hpp>
+#include <SceneTree.hpp>
 
 constexpr unsigned int ANCHO{ 1280 };
 constexpr unsigned int ALTO{ 720 };
@@ -44,15 +44,18 @@ struct Pixeles {
     void start();
     // Una vez has creado todo lo que querias renderizar, recorre el arbol y dibuja todo..
     void end();
+    // Por si no quiere cambiar los buffers front y back, que no sé pa qué pero mejor dar opciones
     void endNoSwap();
-    // Renderiza el arbol, no es mas que una llamada a start y finish, pero asi el usuario puede controlar el renderizado o solo llamar a renderizar y olvidarse
+    // Renderiza el arbol, no es mas que una llamada a start y end, pero asi el usuario puede controlar el renderizado o solo llamar a renderizar y olvidarse
     void render() { start(); end(); };
     // Limpia el arbol de la escena entero, permite el tratamiendo del arbol dentro de un bucle de renderizado.
     void clearScene();
 
+    // Para controlar el bucle de renderizado sin necesidad de llamar directamente a GLFW
     bool rendering() { return !glfwWindowShouldClose(mainWindow); };
     void stopRendering(bool cierre) { glfwSetWindowShouldClose(mainWindow, cierre); };
 
+    // La función de limpiar el fondo
     void cleanBackground(Color c);
 
     Shader* createShader(std::string name, std::string vs, std::string fs);
@@ -119,24 +122,37 @@ struct Pixeles {
     // Getters para los valores privados 
     GLFWwindow* getMainWindow() { return mainWindow; };
     Shader* getDefaultShader() { return defaultShader; };
+    Shader* getSkyboxShader() { return skyboxShader; };
     E_Camera* getPrincipalCamera() { return principalCamera; };
+    // Si quiere acceder al árbol se lo permitimos, pero es opcional completamente
     Node* getSceneRoot() { return sceneRoot.get(); };
     uint16_t getScreenWidth() { return SCREEN_WIDTH; };
     uint16_t getScreenHeight() { return SCREEN_WIDTH; };
 
-    void loadSkybox(std::vector<std::string> faces);
+    // Funcionalidades varias como si hay pulsada una tecla, recuperar el tiempo del programa...
+    // Cuando mejores tu motor podrás ir añadiendolas
     bool isKeyPressed(uint16_t key);
-    void switchFullscreen();
     float getTime() { return static_cast<float>(glfwGetTime()); };
+    void switchFullscreen();
 
 private:
     // Funcion interna para el dibujado 3D, ayuda a encapsular el renderizado
+    // básicamente recorre el árbol e informa los uniform
     void draw3D();
 
+    // Carga el espacio en OpenGL del Skybox
     void setupSkybox();
 
+    // Carga los shaders default
     void loadDefaultShaders();
 
+    // Arranca la ventana de OpenGL y todo lo necesario para nuestro motor
+    GLFWwindow* setupOpenGL(uint16_t width, uint16_t height, std::string name);
+
+    // Carga las imágenes de un skybox con OpenGL
+    void loadSkybox(std::vector<std::string> faces);
+
+    // Métodos para pasar de nuestras clases propias a GLM
     glm::vec2 parseGLM(Vec2 vector) { return glm::vec2(vector.x, vector.y); }
     glm::vec3 parseGLM(Vec3 vector) { return glm::vec3(vector.x, vector.y, vector.z); }
     glm::vec4 parseGLM(Vec4 vector) { return glm::vec4(vector.x, vector.y, vector.z, vector.w); }
@@ -166,16 +182,3 @@ private:
     uint16_t SCREEN_WIDTH{}, SCREEN_HEIGHT{};
     unsigned int skybox{};
 };
-
-// Metodos generales de utilidad para el motor 
-
-// Arranca la ventana de OpenGL y todo lo necesario para nuestro motor
-GLFWwindow* setupOpenGL(uint16_t width, uint16_t height, std::string name);
-
-// Permite hacer resize dinamico de la ventana de OpenGL
-void resizeCallback(GLFWwindow* window, int width, int height);
-
-// Limpia el fondo en un color especifico
-void cleanBackground(Color c);
-
-void switchFullscreen();

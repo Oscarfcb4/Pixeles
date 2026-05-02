@@ -1,6 +1,8 @@
 #pragma once
+// Como usamos GLM, lo incluimos
 #include <GLM/glm.hpp>
 
+// Forward declaration de tus entidades
 struct Node;
 struct E_Camera;
 struct E_Entity;
@@ -8,13 +10,14 @@ struct E_Model;
 struct E_Light;
 struct E_Skybox;
 
+// Los tipos de recursos
 enum class RType {
     RModel,
     RShader,
     RCube
 };
 
-// Definimos nuestro propio tipo color
+// Nuestro propio tipo color
 typedef struct Color {
 	float r, g, b, a;
 
@@ -36,7 +39,7 @@ typedef struct Color {
     }
 } Color;
 
-// Colores por defecto
+// Colores por defecto, en RGB, define todos los que quieras
 #define LIGHTGRAY  Color(200, 200, 200, 1.0f)
 #define GRAY       Color(130, 130, 130, 1.0f)
 #define DARKGRAY   Color( 80,  80,  80, 1.0f)
@@ -64,6 +67,7 @@ typedef struct Color {
 #define MAGENTA    Color(255,   0, 255, 1.0f)
 #define NICEWHITE  Color(220, 220, 220, 1.0f)
 
+// Los IDs de las teclas, van en par con las de GLFW, yo definiría todas las básicas
 #define K_SPACE          32   //   //
 #define K_APOSTROPHE     39   // ' // 
 #define K_COMMA          44   // , // 
@@ -183,16 +187,18 @@ typedef struct Color {
 #define K_RIGHT_SUPER    347 
 #define K_MENU           348 
 
-// Vectores con unos operadores definidos
+// Vectores análogos de glm::vec
 typedef struct Vec2 {
     float x, y;
 
-    // Constructores
+    // Constructores, uno por defecto
     Vec2() : x(0), y(0) {}
+    // Otro con parámetros
     Vec2(float x_, float y_) : x(x_), y(y_) {}
+    // Y otro que recibe un glm::vec y lo transforma, importantísimo
     Vec2(glm::vec2& v) : x(v.x), y(v.y) {}
 
-    // Operadores (sin cambios)
+    // Todos los operadores
     bool operator==(const Vec2& v) const { return (x == v.x && y == v.y); }
     bool operator!=(const Vec2& v) const { return (x != v.x || y != v.y); }
     Vec2 operator+(const Vec2& v) const { return Vec2(x + v.x, y + v.y); }
@@ -201,9 +207,11 @@ typedef struct Vec2 {
     Vec2 operator/(const float& f) const { return Vec2(x / f, y / f); }
     Vec2 operator+=(const Vec2& v) { x += v.x; y += v.y; return *this; }
     Vec2 operator-=(const Vec2& v) { x -= v.x; y -= v.y; return *this; }
+    // Definimos el operador asignación para glm::vec, también importante  
     Vec2& operator=(const glm::vec2& v) { x = v.x; y = v.y; return *this; }
 } Vec2;
 
+// Lo mismo pero con Vec3 y Vec4
 typedef struct Vec3 {
     float x, y, z;
 
@@ -211,7 +219,7 @@ typedef struct Vec3 {
     Vec3(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
     Vec3(glm::vec3& v) : x(v.x), y(v.y), z(v.z) {}
 
-    // ... operadores (análogos a Vec2, añadiendo z)
+    // Operadores
     bool operator==(const Vec3& v) const { return (x == v.x && y == v.y && z == v.z); }
     bool operator!=(const Vec3& v) const { return (x != v.x || y != v.y || z != v.z); }
     Vec3 operator+(const Vec3& v) const { return Vec3(x + v.x, y + v.y, z + v.z); }
@@ -230,7 +238,7 @@ typedef struct Vec4 {
     Vec4(float x_, float y_, float z_, float w_) : x(x_), y(y_), z(z_), w(w_) {}
     Vec4(glm::vec4& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
-    // ... operadores análogos
+    // Operadores
     bool operator==(const Vec4& v) const { return (x == v.x && y == v.y && z == v.z && w == v.w); }
     bool operator!=(const Vec4& v) const { return (x != v.x || y != v.y || z != v.z || w != v.w); }
     Vec4 operator+(const Vec4& v) const { return Vec4(x + v.x, y + v.y, z + v.z, w + v.w); }

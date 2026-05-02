@@ -1,4 +1,4 @@
-#include <Pixeles/Shader.hpp>
+#include <Shader.hpp>
 
 using namespace std;
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <GLM/glm.hpp>
-#include <Pixeles/PixelesTypes.hpp>
+#include <PixelesTypes.hpp>
 
 struct ResourceManager;
 struct E_Camera;

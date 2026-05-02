@@ -1,45 +1,44 @@
-#include <Pixeles/Pixeles.hpp>
-#include <Pixeles/SceneTree.hpp>
-#include <Pixeles/ResourceManager.hpp>
-#include <Pixeles/Shader_Default.hpp>
+#include <Pixeles.hpp>
+#include <SceneTree.hpp>
+#include <ResourceManager.hpp>
+#include <ShadersDefault.hpp>
 
 // Variables generales para la ventana, la relacion de aspecto y el ultimo color de limpieza de pantalla
 GLFWwindow* window{};
 float aspect{};
 Color cleanColor{};
-const unsigned int SHADOW_WIDTH{ 1024 }, SHADOW_HEIGHT{ 1024 };
 unsigned int WIDTH{}, HEIGHT{};
 bool fullscreen{};
-double lastTime{ glfwGetTime() };
-int oldState = GLFW_RELEASE;
 
+// Importante para manejar nosotros la memoria y que no haya fugas
 Pixeles::~Pixeles() = default;
 
 // Constructor que arranca Pixeles
 Pixeles::Pixeles(uint16_t width, uint16_t height, std::string name) {
     // Inicializamos la pantalla principal con OpenGL
     mainWindow = setupOpenGL(width, height, name);
+    // Guardamos nuestras variables locales y globales del motor
     WIDTH = width;
     HEIGHT = height;
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
+    // Calculamos el aspect ratio y lo guardamos
+    aspect = static_cast<float>(width) / static_cast<float>(height);
 
     // Si esta pantalla no existe es que OpenGL ha fallado por algun motivo, abortamos y pintamos por pantalla
     if (mainWindow == NULL) {
         std::cout << "ERROR::OPENGL::FAILED TO CREATE WINDOW" << std::endl;
         return;
     }
-
+    // Le asignamos a la global window la ventana
+    window = mainWindow;
     // Creamos el nodo raiz del arbol
     sceneRoot = std::make_unique<Node>();
     // Le decimos al resource manager que esta es la raiz de nuestra escena
     RM.setScene(sceneRoot.get());
     // Precargamos el shader base
     loadDefaultShaders();
-    // Le asignamos a la global window la ventana
-    window = mainWindow;
-    // Calculamos el aspect ratio y lo guardamos
-    aspect = static_cast<float>(width) / static_cast<float>(height);
+    // Creamos el espacio para el skybox en OpenGL
     setupSkybox();
 }
 
@@ -95,8 +94,6 @@ void Pixeles::setWindow(void* win, uint16_t width, uint16_t height) {
     RM.setScene(sceneRoot.get());
     loadDefaultShaders();
     aspect = static_cast<float>(width) / static_cast<float>(height);
-    // Como no pasamos por setupOpenGL nos aseguramos de que esto este activo
-    glfwSetFramebufferSizeCallback(window, resizeCallback);
     stbi_set_flip_vertically_on_load(true);
     // Activamos el Face Culling
     glEnable(GL_CULL_FACE);
@@ -185,7 +182,7 @@ E_Camera* Pixeles::createCamera(Vec3 position, Vec3 up, float yaw, float pitch) 
     // Lo anadimos a la raiz como hijo, para que forme parte de la escena
     sceneRoot->addChild(nCam.get());
     // Devuelve un puntero al nodo, para que el usuario pueda jugar con él
-    return dynamic_cast<E_Camera*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+    return dynamic_cast<E_Camera*>(eCam.get());
 }
 
 E_Light* Pixeles::createDirectionalLight(Vec3 amb, Vec3 dir, Vec3 dif, Vec3 spc, std::string shader) {
@@ -208,7 +205,7 @@ E_Light* Pixeles::createDirectionalLight(Vec3 amb, Vec3 dir, Vec3 dif, Vec3 spc,
     eLight->node = nLight.get();
     // Aumenta el contador de luces direccionales 
     numLights.x += 1;
-    return dynamic_cast<E_Light*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+    return dynamic_cast<E_Light*>(eLight.get());
 }
 
 E_Light* Pixeles::createPointLight(Vec3 pos, Vec3 amb, Vec3 dif, Vec3 spc, Vec3 att, std::string shader) {
@@ -231,7 +228,7 @@ E_Light* Pixeles::createPointLight(Vec3 pos, Vec3 amb, Vec3 dif, Vec3 spc, Vec3 
     eLight->node = nLight.get();
     // Esta vez aumentamos el numero de luces puntuales
     numLights.y += 1;
-    return dynamic_cast<E_Light*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+    return dynamic_cast<E_Light*>(eLight.get());
 }
 
 E_Light* Pixeles::createSpotLight(Vec3 pos, Vec3 dir, Vec3 amb, Vec3 dif, Vec3 spc, Vec3 att, Vec2 cut, std::string shader) {
@@ -255,7 +252,7 @@ E_Light* Pixeles::createSpotLight(Vec3 pos, Vec3 dir, Vec3 amb, Vec3 dif, Vec3 s
     eLight->node = nLight.get();
     // Esta vez aumentamos el numero de luces focales
     numLights.z += 1;
-    return dynamic_cast<E_Light*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+    return dynamic_cast<E_Light*>(eLight.get());
 }
 
 E_Model* Pixeles::createModel(std::string path, Vec3 pos, Vec3 size, float rotAngle, Vec3 rotAxis, std::string shader) {
@@ -277,7 +274,7 @@ E_Model* Pixeles::createModel(std::string path, Vec3 pos, Vec3 size, float rotAn
     eModel->setAspect(aspect);
     sceneRoot->addChild(std::move(nModel.get()));
     eModel->node = nModel.get();
-    return dynamic_cast<E_Model*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+    return dynamic_cast<E_Model*>(eModel.get());
 }
 
 E_Model* Pixeles::createCube(Vec3 pos, Vec3 size, Color color, float rotAngle, Vec3 rotAxis, bool texture) {
@@ -315,7 +312,7 @@ E_Model* Pixeles::createCube(Vec3 pos, Vec3 size, Color color, float rotAngle, V
 	sceneRoot->addChild(std::move(nCube.get()));
     eCube->node = nCube.get();
 	// Recuperamos el nodo para el usuario
-	return dynamic_cast<E_Model*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+	return dynamic_cast<E_Model*>(eCube.get());
 }
 
 E_Skybox* Pixeles::createSkybox(std::vector<std::string> faces) {
@@ -333,7 +330,7 @@ E_Skybox* Pixeles::createSkybox(std::vector<std::string> faces) {
     nCube->setEntity(std::move(eCube.get()));
     sceneRoot->addChild(std::move(nCube.get()));
     eCube->node = nCube.get();
-    return dynamic_cast<E_Skybox*>(sceneRoot->getChildren()[sceneRoot->getChildren().size() - 1]->getEntity());
+    return dynamic_cast<E_Skybox*>(eCube.get());
 }
 
 // Metodo de renderizado global
@@ -355,13 +352,8 @@ void Pixeles::draw3D() {
     sceneRoot->traversal(glm::mat4{ 1.0f }, sceneRoot->getPrincipalCamera());
 }
 
-// Redefinicion del metodo de OpenGL, permite hacer resize de la ventana manualmente
-void resizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
-
 // Metodo para arrancar OpenGL
-GLFWwindow* setupOpenGL(uint16_t width, uint16_t height, std::string name) {
+GLFWwindow* Pixeles::setupOpenGL(uint16_t width, uint16_t height, std::string name) {
     // Inicio GLFW
     if (!glfwInit())
         std::cout << "Failed to initiate GLFW" << std::endl;
@@ -389,8 +381,6 @@ GLFWwindow* setupOpenGL(uint16_t width, uint16_t height, std::string name) {
     }
     // Iniciamos el viewport de OpenGL
     glViewport(0, 0, width, height);
-    // Le decimos a GLFW que use la funcion nuestra para cada vez que se intente cambiar el size de la ventana
-    glfwSetFramebufferSizeCallback(window, resizeCallback);
     // Le decimos a OpenGL que maneje las profundidades con el Z-Buffer
     glEnable(GL_DEPTH_TEST);
     // Activamos el Face Culling

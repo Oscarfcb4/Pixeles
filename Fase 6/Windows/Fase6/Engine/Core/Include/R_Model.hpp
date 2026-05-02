@@ -3,11 +3,11 @@
 #include <Assimp/Importer.hpp>
 #include <Assimp/scene.h>
 #include <Assimp/postprocess.h>
-#include <Pixeles/R_Mesh.hpp>
+#include <R_Mesh.hpp>
 #include <iostream>
 #include <STB/stb_image.h>
-#include <Pixeles/PixelesTypes.hpp>
-#include <Pixeles/ResourceManager.hpp>
+#include <PixelesTypes.hpp>
+#include <ResourceManager.hpp>
 
 // Clase modelo, generica.
 

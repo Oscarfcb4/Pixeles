@@ -1,5 +1,5 @@
 #pragma once
-#include <Pixeles/Shader.hpp>
+#include <Shader.hpp>
 
 // Clase de recruso Shader
 struct R_Shader: virtual public R_Resource{

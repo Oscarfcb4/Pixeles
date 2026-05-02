@@ -1,5 +1,5 @@
 #pragma once
-#include <Pixeles/PixelesTypes.hpp>
+#include <PixelesTypes.hpp>
 #include <Assimp/Importer.hpp>
 #include <Assimp/scene.h>
 #include <Assimp/postprocess.h>
@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include <Pixeles/R_AllResources.hpp>
+#include <R_AllResources.hpp>
 
 // Forward declaration
 struct Node;

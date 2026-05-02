@@ -1,7 +1,7 @@
 #pragma once
 #include <GLM/glm.hpp>
-#include <Pixeles/PixelesTypes.hpp>
-#include <Pixeles/ResourceManager.hpp> 
+#include <PixelesTypes.hpp>
+#include <ResourceManager.hpp> 
 
 struct R_Model;
 struct R_Shader;
