@@ -6,7 +6,7 @@
 // Definimos el ancho, alto y nombre de nuestra ventana
 constexpr unsigned int ANCHO{ 1280 };
 constexpr unsigned int ALTO{ 720 };
-constexpr const char* NOMBRE = "Ventana";
+constexpr const char* NOMBRE = "Una ventana a OpenGL";
 
 // Definimos nuestros colores de ventana fuera del main
 glm::vec4 color1(0.78, 0.78, 0.78, 0.78);
